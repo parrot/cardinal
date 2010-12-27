@@ -44,14 +44,14 @@ src/builtins/globals.pir - initialize miscellaneous global variables
     .local pmc interp
     interp = getinterp
 
-    #$P5 = interp.'stdhandle'(.PIO_STDIN_FILENO)
+    #$P5 = interp.'stdin_handle'(.PIO_STDIN_FILENO)
     #set_hll_global '$stdin', $P5
     #set_hll_global '$>', $P5
 
-    $P6 = interp.'stdhandle'(.PIO_STDOUT_FILENO)
+    $P6 = interp.'stdout_handle'(.PIO_STDOUT_FILENO)
     set_hll_global '$stdout', $P6
 
-    #$P7 = interp.'stdhandle'(.PIO_STDERR_FILENO)
+    #$P7 = interp.'stderr_handle'(.PIO_STDERR_FILENO)
     #set_hll_global 'stderr', $P7
 
     $P2 = new 'CardinalString'

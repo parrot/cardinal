@@ -25,7 +25,7 @@ TrueClass - Cardinal boolean class
     .return ($P0)
 .end
 
-.sub '_not' :vtable('logical_not') :method
+.sub '_not' :vtable('neg') :method
     .param pmc wtf
     $P0 = get_hll_global 'false'
     .return ($P0)
