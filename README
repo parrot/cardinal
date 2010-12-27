@@ -1,4 +1,4 @@
-Cardinal is a Ruby compiler for Parrot.
+Cardinal is a Ruby compiler for Parrot Virtual Machine.
 
 The parser is fairly complete.  The standard library exists, but still needs filling out.
 
@@ -7,3 +7,7 @@ Cardinal's parser is very *very* slow. You can precompile to PIR with --target=p
 Cardinal is back in active development, under the stewardship of Ted Reed <ted.reed@gmail.com>.
 
 We also have an IRC channel: #cardinal on irc.parrot.org
+
+You are also invited to #parrot on irc.parrot.org
+
+
