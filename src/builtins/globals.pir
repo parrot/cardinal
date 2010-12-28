@@ -48,7 +48,7 @@ src/builtins/globals.pir - initialize miscellaneous global variables
     #set_hll_global '$stdin', $P5
     #set_hll_global '$>', $P5
 
-    $P6 = interp.'stdout_handle'(.PIO_STDOUT_FILENO)
+    $P6 = interp.'stdout_handle'()
     set_hll_global '$stdout', $P6
 
     #$P7 = interp.'stderr_handle'(.PIO_STDERR_FILENO)

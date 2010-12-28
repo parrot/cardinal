@@ -39,7 +39,7 @@ builtin functions for Ruby.
 .sub 'readline'
     #.param pmc sep              :optional #record sep
     $P0 = getinterp
-    $P0 = $P0.'stdin_handle'(.PIO_STDIN_FILENO)
+    $P0 = $P0.'stdin_handle'()
     $S0 = $P0.'readline'('')
     .return($S0)
 .end

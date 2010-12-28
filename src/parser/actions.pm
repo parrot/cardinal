@@ -885,10 +885,10 @@ sub is_a_sub($name) {
     our @?BLOCK;
     if $?BLOCK.symbol(~$name) {
         if defined($?BLOCK.symbol(~$name)<arity>) {
-            return(1);
+            return 1;
         }
         else {
-            return(0);
+            return0;
         }
     }
     for @?BLOCK {
@@ -896,17 +896,17 @@ sub is_a_sub($name) {
             my $sym_table := $_.symbol(~$name);
             if $sym_table {
                 if defined($sym_table<arity>) {
-                    return(1);
+                    return 1;
                 }
                 else {
-                    return(0);
+                    return 0;
                 }
             }
         }
     }
     my $lex := lex_lookup($name);
-    if $lex && ~lookup_class($lex) eq 'Sub' { return(1); }
-    return(0);
+    if $lex && ~lookup_class($lex) eq 'Sub' { return 1; }
+    return 0;
 }
 
 # Local Variables:
