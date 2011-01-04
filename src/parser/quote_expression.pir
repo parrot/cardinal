@@ -397,7 +397,7 @@
     goto scan_xdo_char_loop
   scan_xdo_char_end:
     $S1 = chr decnum
-    concat literal, $S1
+    literal = concat literal, $S1
     unless isbracketed goto scan_xdo_end
     if $S0 == ']' goto scan_xdo_end
     if $S0 != ',' goto fail

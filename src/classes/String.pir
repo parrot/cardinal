@@ -532,8 +532,8 @@ Returns a Perl representation of the Str.
     $S0 = "\""
     $S1 = self
     $S1 = escape $S1
-    concat $S0, $S1
-    concat $S0, "\""
+    $S0 = concat $S0, $S1
+    $S0 = concat $S0, "\""
     .return ($S0)
 .end
 
@@ -830,7 +830,7 @@ Should replace vec with declared arrays of bit, uint2, uint4, etc.
 .sub 'infix:<<' :multi('CardinalString',_)
     .param pmc s
     .param pmc item
-    concat s, item
+    s = concat s, item
     .return(s)
 .end
 

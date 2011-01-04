@@ -35,10 +35,10 @@ src/classes/CardinalHash.pir - Cardinal hash class and related functions
     $S2 = it[$S1]
     $S0 = concat $S0, $S1
     $S0 = concat $S0, '=>'
-    concat $S0, $S2
+    $S0 = concat $S0, $S2
     goto loop
   end:
-    concat $S0, '}'
+    $S0 = concat $S0, '}'
     .return ($S0)
 .end
 
@@ -56,9 +56,9 @@ Returns a string of keys and values appended together.
   loop:
     unless it goto end
     $S1 = shift it
-    concat rv, $S1
+    rv = concat rv, $S1
     $S1 = it[$S1]
-    concat rv, $S1
+    rv = concat rv, $S1
     goto loop
   end:
     .return (rv)

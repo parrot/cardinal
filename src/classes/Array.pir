@@ -654,15 +654,15 @@ Returns a string comprised of all of the list, separated by the string SEPARATOR
     if i == len goto last
 
     tmp = self[i]
-    concat res, tmp
-    concat res, sep
+    res = concat res, tmp
+    res = concat res, sep
 
     inc i
     goto loop
 
   last:
     tmp = self[i]
-    concat res, tmp
+    res = concat res, tmp
 
   done:
     $S0 = res
