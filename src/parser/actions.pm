@@ -905,7 +905,7 @@ sub is_a_sub($name) {
         }
     }
     my $lex := lex_lookup($name);
-    if $lex && ~lookup_class($lex) eq 'Sub' { return 1; }
+    if defined($lex) && ~lookup_class($lex) eq 'Sub' { return 1; }
     return 0;
 }
 
