@@ -289,7 +289,7 @@ file "build.yaml" do
 
     $config[:parrot] = $config[:build_dir] + "/parrot"
     $config[:perl6grammar] = $config[:build_dir] + "/runtime/parrot/library/PGE/Perl6Grammar.pbc"
-    $config[:nqp] = $config[:build_dir] + "/compilers/nqp/nqp.pbc"
+    $config[:nqp] = $config[:build_dir] + "/runtime/parrot/library/nqp-rx.pbc"
     $config[:pct] = $config[:build_dir] + "/runtime/parrot/library/PCT.pbc"
     $config[:pbc_to_exe] = $config[:build_dir] + "/pbc_to_exe"
 
