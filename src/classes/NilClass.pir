@@ -11,6 +11,20 @@
 
 =over 4
 
+=item _get_bool()
+
+Return true when integers are queried about the thier trueth value
+
+=cut
+
+.sub '_get_bool' :vtable('get_bool') :method
+    $P0 = new 'Boolean'
+    $P0 = 0
+    .return ($P0)
+.end
+
+
+
 =item get_string()    (vtable method)
 
 Return the elements of the list concatenated.

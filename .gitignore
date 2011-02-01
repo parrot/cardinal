@@ -17,4 +17,8 @@ installable_cardinal
 
 Test.pir
 src/gen_*.pir
+src/*/gen_*.pir
 build.yaml
+t/*/gen_*.pir
+t/gen_*.pir
+*.*~

@@ -14,6 +14,7 @@ line containing C<{*}> also has a C<#= key> comment, then the
 value of the comment is passed as the second argument to the method.
 
 =end comments
+=cut
 
 class cardinal::Grammar::Actions;
 
@@ -400,8 +401,11 @@ method unless_stmt($/) {
     my $body := $<comp_stmt>.ast();
     $body.blocktype('immediate');
     my $past := PAST::Op.new( $cond, $body, :pasttype('unless'), :node($/) );
-    if $<else> {
-        $past.push( $<else>[0].ast() );
+    if ( $<else> ) {
+        # $past.push( $<else>[0].ast() );
+	my $else := $<else>[0].ast();
+	$else.blocktype('immediate');
+	$past.push( $else );
     }
     make $past;
 }

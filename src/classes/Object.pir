@@ -203,6 +203,18 @@ Returns true if he object is defined, false otherwise
    .return ($I0)
 .end
 
+=item _get_bool()
+
+Return true when integers are queried about the thier trueth value
+
+=cut
+
+.sub '_get_bool' :vtable('get_bool') :method
+    $P0 = new 'Boolean'
+    $P0 = 1
+    .return ($P0)
+.end
+
 =item print()
 
 =item say()

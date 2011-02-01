@@ -49,6 +49,18 @@ Returns a Perl representation of the CardinalInteger.
   .return($P0)
 .end
 
+=item _get_bool()
+
+Return true when integers are queried about the thier trueth value
+
+=cut
+
+.sub '_get_bool' :vtable('get_bool') :method
+    $P0 = new 'Boolean'
+    $P0 = 1
+    .return ($P0)
+.end
+
 =item to_s()
 
 Returns a CardinalString representation of the CardinalInteger.
