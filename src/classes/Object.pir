@@ -205,7 +205,7 @@ Returns true if he object is defined, false otherwise
 
 =item _get_bool()
 
-Return true when integers are queried about the thier trueth value
+Return true when integers are queried about the their truth value
 
 =cut
 

@@ -63,7 +63,7 @@ Returns the number of characters in C<self>
 
 =item _get_bool()
 
-Return true when integers are queried about the thier trueth value
+Return true when integers are queried about the their truth value
 
 =cut
 
