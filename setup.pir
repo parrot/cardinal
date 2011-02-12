@@ -131,7 +131,7 @@ SOURCES
     $S0 = get_tags()
     $P0['smolder_tags'] = $S0
     $P0['prove_archive'] = 'report.tar.gz'
-    $P0['smolder_url'] = 'http://smolder.plusthree.com/app/projects/process_add_report/16'
+    $P0['smolder_url'] = 'http://smolder.parrot.org/app/projects/process_add_report/10'
 
     # dist
     $P8 = glob('Test.rb Rakefile')

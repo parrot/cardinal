@@ -240,7 +240,7 @@ end
 
 desc "Submit a smolder report."
 task :smolder => "report.tar.gz" do
-    sh "curl -F \"architecture=#{get_arch}\" -F \"platform=#{get_platform}\" -F \"revision=#{get_commit}\" -F \"report_file=@report.tar.gz\" http://smolder.plusthree.com/app/public_projects/process_add_report/16"
+    sh "curl -F \"architecture=#{get_arch}\" -F \"platform=#{get_platform}\" -F \"revision=#{get_commit}\" -F \"report_file=@report.tar.gz\" http://smolder.parrot.org/app/public_projects/process_add_report/10"
 end
 
 desc "Determine configuration information"
