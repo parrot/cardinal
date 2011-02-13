@@ -240,7 +240,32 @@ end
 
 desc "Submit a smolder report."
 task :smolder => "report.tar.gz" do
-    sh "curl -F \"architecture=#{get_arch}\" -F \"platform=#{get_platform}\" -F \"revision=#{get_commit}\" -F \"report_file=@report.tar.gz\" http://smolder.parrot.org/app/public_projects/process_add_report/10"
+  puts 'Creating a smolder report. This will take only a few minutes...', ''
+
+  command = 'curl '
+  contents = {
+    :username => 'parrot-autobot',
+    :password => 'qa_rocks',
+    :comments => 'Submit a smolder report.',
+    :architecture => "#{get_arch}",
+    :revision => "#{get_commit}",
+    :report_file => '@report.tar.gz'
+  }
+  url = 'http://smolder.parrot.org/app/projects/process_add_report/10'
+
+  contents.each do |k, v|
+    command << %Q(-F "#{k.to_s}=#{v}" )
+  end
+  command << url
+  `#{command} || exit 1`
+
+  if $?.exitstatus == 0
+    puts 'Your report sumitted.', 'You can see other recent reports
+t http://smolder.parrot.org/app/projects/smoke_reports/10'
+  else
+    puts 'Error occurred. Please contact Cardinal Team.', '#cardinal
+n irc.parrot.org'
+  end
 end
 
 desc "Determine configuration information"
