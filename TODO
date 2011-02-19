@@ -1,0 +1,15 @@
+Core
+----
+Parser needs to be re-written in NQP-rx
+Parser is incomplete
+Standard Library needs to be finished
+
+Test suite
+----------
+Test suite should always pass.  Any failing tests should be marked as SKIP or TODO with a note in the output to the issue number.
+
+Infrastructure
+--------------
+The wiki and issue tracker need to be migrated from cardinal/cardinal to parrot/cardinal on github
+An HLL development team needs to be created on github, with privledges to HLLs like cardinal but not to parrot core repos
+Take down the old cardinal repo on github after this is done

@@ -1,0 +1,19 @@
+1)  Get Parrot
+
+git clone git://github.com/parrot/parrot.git
+
+2)  Install Parrot
+
+cd parrot
+perl Configure.pl
+make
+make install
+
+3)  Get Cardinal
+
+git clone git://github.com/parrot/cardinal.git
+
+4)  Install Cardinal
+
+cd cardinal
+parrot setup.pir
