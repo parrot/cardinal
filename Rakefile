@@ -261,10 +261,10 @@ task :smolder => "report.tar.gz" do
 
   if $?.exitstatus == 0
     puts 'Your report sumitted.', 'You can see other recent reports
-t http://smolder.parrot.org/app/projects/smoke_reports/10'
+at http://smolder.parrot.org/app/projects/smoke_reports/10'
   else
     puts 'Error occurred. Please contact Cardinal Team.', '#cardinal
-n irc.parrot.org'
+on irc.parrot.org'
   end
 end
 
