@@ -10,6 +10,7 @@ MANIFEST
 .DS_Store
 cardinal
 installable_cardinal
+report/
 
 *.tar.gz
 *.zip
