@@ -497,11 +497,11 @@ Warning: Partial implementation. Look for TODO
     goto oob
     neg_access:
         $S0 = replace tmp, start, stop, replace_with
-        self = tmp
+        self = $S0
         .return()
     pos_access:
         $S0 = replace tmp, start, stop, replace_with
-        self = tmp
+        self = $S0
         .return()
     oob:
         say "oob, IndexException"
