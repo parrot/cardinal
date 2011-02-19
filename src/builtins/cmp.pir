@@ -24,6 +24,16 @@ Swiped from Rakudo.
     .return ($P0)
 .end
 
+.sub 'not_bool'
+    .param pmc a
+    if a goto a_true
+    $P0 = get_hll_global 'true'
+    .return ($P0)
+  a_true:
+    $P0 = get_hll_global 'false'
+    .return ($P0)
+.end
+
 .sub 'infix:==' :multi(_,_)
     .param pmc a
     .param pmc b
@@ -77,8 +87,12 @@ Swiped from Rakudo.
 .sub 'infix:==' :multi(Integer,Integer)
     .param pmc a
     .param pmc b
-    $I0 = iseq a, b
-    .tailcall 'bool'($I0)
+    eq a, b, a_b_eq
+    $P0 = get_hll_global 'false'
+    .return($P0)
+  a_b_eq:
+    $P0 = get_hll_global 'true'
+    .return($P0)
 .end
 
 .sub 'infix:==' :multi(String,String)
@@ -140,7 +154,7 @@ Swiped from Rakudo.
     .param pmc a
     .param pmc b
     $P0 = 'infix:=='(a, b)
-    $P0 = not $P0
+    $P0 = not_bool($P0)
     .return ($P0)
 .end
 
@@ -207,7 +221,7 @@ Swiped from Rakudo.
     .param pmc topic
     .param pmc x
     $P0 = x(topic)
-    $P0 = not $P0
+    $P0 = not_bool($P0)
     .return ($P0)
 .end
 
