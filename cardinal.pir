@@ -65,7 +65,7 @@ object.
     compiler.'parseactions'($P0)
 
     compiler.'commandline_banner'("Cardinal - Ruby for the Parrot VM\n\n")
-    compiler.'commandline_prompt'('crb(main):001:0>')
+    compiler.'commandline_prompt'('crb(main):001:0> ')
 
      ##  create a list of END blocks to be run
     $P0 = new 'CardinalArray'
