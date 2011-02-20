@@ -137,11 +137,9 @@ Gets the beginning or end of the range.
    $P0 = getattribute self, '$!from_exclusive'
    $P1 = getattribute self, '$!to_exclusive'
    $P2 = $P0 && $P1
-   if $P2 goto build_exclusive
-   goto build_inclusive
-   build_inclusive:
-      $S0 = '..'
-      goto build_return
+   if $P2 > 0 goto build_exclusive
+   $S0 = '..'
+   goto build_return
    build_exclusive:
       $S0 = '...'
       goto build_return
