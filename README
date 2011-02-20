@@ -10,4 +10,20 @@ We also have an IRC channel: #cardinal on irc.parrot.org
 
 You are also invited to #parrot on irc.parrot.org
 
+= Building from source =
 
+After obtaining the source code, run:
+
+    parrot setup.pir
+
+To run some tests run:
+
+    parrot setup.pir test
+
+Note that some of them will probably fail, as Cardinal is not yet complete
+
+If you want to install Cardinal to your Parrot install directory, run:
+
+    parrot setup.pir install
+
+The compiler will be available as parrot-cardinal
