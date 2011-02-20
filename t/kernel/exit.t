@@ -5,7 +5,7 @@ plan 1
 pass '.exit! on Kernel'
 
 
-Kernel.exit! 1
+Kernel.exit! 0
 
 #should never get here
 fail '.exit! on Kernel'
