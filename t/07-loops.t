@@ -15,9 +15,8 @@ for i in a
 end
 
 a = [1,2,3,4,5,6,7,8]
-
 for i in a
-    next if i % 2
+    next if i % 2 == 0
     nok(i % 2, 'next in for loop')
 end
 
