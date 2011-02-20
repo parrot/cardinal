@@ -328,7 +328,7 @@ Generate the next element at the front of the CardinalRange.
     fromexc = getattribute self, '$!from_exclusive'
     value = clone from
     inc from
-    unless fromexc goto have_value
+    unless fromexc > 0 goto have_value
     value = clone from
   have_value:
     $I0 = self.'!to_test'(value)
@@ -350,7 +350,7 @@ Return true if there are any more values to iterate over.
     .local pmc from, fromexc
     from = getattribute self, '$!from'
     fromexc = getattribute self, '$!from_exclusive'
-    unless fromexc goto have_value
+    unless fromexc > 0 goto have_value
     from = clone from
     inc from
   have_value:
@@ -503,7 +503,7 @@ honoring exclusive flags.
     .return ($I0)
   test_value:
     toexc = getattribute self, '$!to_exclusive'
-    if toexc goto exclusive_test
+    if toexc > 0 goto exclusive_test
     $I0 = isle topic, to
     .return ($I0)
   exclusive_test:
