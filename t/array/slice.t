@@ -42,9 +42,9 @@ is a.slice(1,10), [2,3,4,5], 'slice, start+count, big count'
 is a.slice(1,-1), nil,       'slice, start+count, negative count'
 is a.slice(10,2), nil,       'slice, start+count, out of bounds start'
 
-is a[1..2], [2,3],      'array acces, range'
-is a[1..10], [2,3,4,5], 'array acces, range, big range'
-is a[-6..-1], nil,      'array acces, range, negative range'
+is a[1..2], [2,3],      'array access, range'
+is a[1..10], [2,3,4,5], 'array access, range, big range'
+is a[-6..-1], nil,      'array access, range, negative range'
 
 is a.slice(1..2), [2,3],      'slice, range'
 is a.slice(1..10), [2,3,4,5], 'slice, range, big range'
