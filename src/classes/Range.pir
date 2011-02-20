@@ -480,7 +480,7 @@ honoring exclusive flags.
     .local pmc from, fromexc
     from = getattribute self, '$!from'
     fromexc = getattribute self, '$!from_exclusive'
-    if fromexc goto exclusive_test
+    if fromexc > 0 goto exclusive_test
     $I0 = isge topic, from
     .return ($I0)
   exclusive_test:
