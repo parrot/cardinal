@@ -1371,7 +1371,7 @@ Retrieve the number of elements in C<self>
 
     $I0 = 0 
   range_loop:
-    if $I0 >= count goto done
+    if $I0 > count goto done
     $I1 = $I0 + beg
     if $I1 == len goto range_outofrange
     val = a[$I1]
