@@ -503,7 +503,7 @@ honoring exclusive flags.
     .return ($I0)
   test_value:
     toexc = getattribute self, '$!to_exclusive'
-    if toexc > 0 goto exclusive_test
+    if toexc, exclusive_test
     $I0 = isle topic, to
     .return ($I0)
   exclusive_test:
