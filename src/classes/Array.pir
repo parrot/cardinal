@@ -1536,7 +1536,7 @@ Retrieve the number of elements in C<self>
     end = r.'to'()
 
     $P0 = getattribute r, '$!to_exclusive'
-    if $P0 goto skip_exclusive_to
+    unless $P0 goto skip_exclusive_to
     inc end
 
   skip_exclusive_to:
