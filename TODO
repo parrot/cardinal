@@ -3,6 +3,7 @@ Core
 Parser needs to be re-written in NQP-rx
 Parser is incomplete
 Standard Library needs to be finished
+Rewrite object model in 6model
 
 Test suite
 ----------
