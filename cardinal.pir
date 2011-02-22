@@ -32,12 +32,12 @@ object.
 .include 'src/gen_builtins.pir'
 
 .sub 'onload' :anon :load :init
-    load_bytecode 'PCT.pbc'
-    .local pmc parrotns, cardinalns, exports
+    load_bytecode 'HLL.pbc'
+    .local pmc hllns, parrotns, imports
+    hllns    = get_hll_namespace
     parrotns = get_root_namespace ['parrot']
-    cardinalns = get_hll_namespace
-    exports = split ' ', 'PAST PCT PGE'
-    parrotns.'export_to'(cardinalns, exports)
+    imports  = split ' ', 'PAST PCT HLL Regex Hash'
+    parrotns.'export_to'(hllns, imports)
 .end
 
 .include 'src/gen_grammar.pir'
@@ -47,6 +47,8 @@ object.
 
 #no caridinal_group found on my machine
 #.loadlib 'cardinal_group'
+
+=begin comment
 
 .sub 'onload' :anon :load :init
     .local pmc cardinalmeta, compilerclass, compiler
@@ -78,12 +80,12 @@ object.
     $P1['CardinalString'] = 'e'
 .end
 
-=item main(args :slurpy)  :main
+ =item main(args :slurpy)  :main
 
 Start compilation by passing any command line C<args>
 to the cardinal compiler.
 
-=cut
+ =cut
 
 .sub 'main' :main
     .param pmc args_str
@@ -139,6 +141,7 @@ to the cardinal compiler.
     .return (retval)
 .end
 
+=end comment
 
 =back
 

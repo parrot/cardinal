@@ -53,12 +53,10 @@ See <runtime/parrot/library/distutils.pir>.
     $P0['project_uri'] = 'http://github.com/cardinal/cardinal'
 
     # build
-    $P2 = new 'Hash'
-    $P2['src/gen_grammar.pir'] = 'src/parser/grammar.pg'
-    $P0['pir_pge'] = $P2
-
     $P3 = new 'Hash'
+    $P3['src/gen_grammar.pir'] = 'src/parser/grammar.pm'
     $P3['src/gen_actions.pir'] = 'src/parser/actions.pm'
+    $P3['src/gen_compiler.pir'] = 'src/compiler.pm'
     $P0['pir_nqp'] = $P3
 
     $P9 = split "\n", <<'BUILTINS_PIR'
@@ -102,6 +100,7 @@ src/parser/quote_expression.pir
 src/gen_grammar.pir
 src/gen_actions.pir
 src/gen_builtins.pir
+src/gen_compiler.pir
 SOURCES
     $S0 = pop $P5
     $P4['cardinal.pbc'] = $P5

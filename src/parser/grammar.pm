@@ -11,11 +11,11 @@ and parse.y from the ruby source
 
 =end overview
 
-grammar cardinal::Grammar is PCT::Grammar;
+grammar cardinal::Grammar is HLL::Grammar;
 
 token TOP {
     <comp_stmt>
-    [ $ || <panic: Syntax error> ]
+    [ $ || <.panic('Syntax error')> ]
     {*}
 }
 
@@ -26,7 +26,7 @@ token comp_stmt {
 }
 
 rule stmts {
-    <.term>?[ <stmt> [<.term>+ | <.before <end_block>> | $ | <panic: unterminated statement>] ]* {*}
+    <.term>?[ <stmt> [<.term>+ | <.before <end_block>> | $ | <panic('unterminated statement')>] ]* {*}
 }
 
 token term { \h*\n | \h*';' }
@@ -71,7 +71,7 @@ token stmt_mod {
 }
 
 rule expr {
-    [$<not>=['!'|'not']]? <arg> [$<op>=['and'|'or'] <expr>]?
+    [$<not>=['!'|'not']]? <EXPR> [$<op>=['and'|'or'] <expr>]?
     {*}
 }
 
@@ -86,17 +86,17 @@ rule end {
 }
 
 token indexed_assignment {
-    <basic_primary> '[' <keys=args> ']' <.ws> '=' <.ws> <rhs=arg>
+    <basic_primary> '[' $<keys>=<args> ']' <.ws> '=' <.ws> $<rhs>=<EXPR>
     {*}
 }
 
 token member_assignment {
-    <basic_primary> '.' <key=identifier> <.ws> '=' <.ws> <rhs=arg>
+    <basic_primary> '.' $<key>=<identifier> <.ws> '=' <.ws> $<rhs>=<EXPR>
     {*}
 }
 
 rule assignment {
-    <mlhs=lhs> '=' <mrhs=arg>       #XXX need to figure out multiple assignment
+    $<mlhs>=<lhs> '=' $<mrhs>=<EXPR>       #XXX need to figure out multiple assignment
     {*}
 }
 
@@ -184,11 +184,9 @@ token funcall {
 }
 
 rule args {
-    <arg> [',' <arg>]*
+    <EXPR> [',' <EXPR>]*
     {*}
 }
-
-rule 'arg' is optable { ... }
 
 token basic_primary {
     | <literal> {*}                         #= literal
@@ -224,7 +222,7 @@ rule if_stmt {
     <comp_stmt>]*
     <else>?
     'end'
-    |<panic: syntax error in if statement>]
+    |<panic('syntax error in if statement')>]
     {*}
 }
 
@@ -319,12 +317,12 @@ token fname {
 }
 
 token quote_string {
-    ['%q'|'%Q'] <.before <[<[_|({]>> <quote_expression: :qq>
+    ['%q'|'%Q'] <.before <[<[_|({]>> <quote_EXPR: ':qq'>
     {*}
 }
 
 token warray {
-    '%w' <.before <[<[({]>> <quote_expression: :w :q>
+    '%w' <.before <[<[({]>> <quote_EXPR: ':w :q'>
     {*}
 }
 
@@ -344,7 +342,7 @@ rule assocs {
 }
 
 rule assoc {
-    <arg> '=>' <arg>
+    <EXPR> '=>' <EXPR>
     {*}
 }
 
@@ -414,15 +412,15 @@ token integer {
 
 token string {
     [
-    | <.before \'>     <quote_expression: :q>
-    | <.before '"' >   <quote_expression: :qq>
+    | <.before \'>     <quote_EXPR: ':q'>
+    | <.before '"' >   <quote_EXPR: ':qq'>
     ]
     {*}
 }
 
 token regex {
-    <.before '/'> [<quote_expression: :regex> $<modifiers>=[<alpha>]*
-                  |<panic: problem parsing regex>]
+    <.before '/'> [<quote_EXPR: ':regex'> $<modifiers>=[<alpha>]*
+                  |<panic('problem parsing regex')>]
     {*}
 }
 
@@ -442,101 +440,94 @@ token ws {
     | \h* ['#' \N* \n* <ws>]?
 }
 
+INIT {
+    cardinal::Grammar.O(':prec<x=>', '%muldiv');
+    cardinal::Grammar.O(':prec<w=>', '%plusminus');
+    cardinal::Grammar.O(':prec<v=>', '%bsh');
+    cardinal::Grammar.O(':prec<t=>', '%band');
+    cardinal::Grammar.O(':prec<r=>', '%bor');
+    cardinal::Grammar.O(':prec<p=>', '%cmp');
+    cardinal::Grammar.O(':prec<n=>', '%equality');
+    cardinal::Grammar.O(':prec<l=>', '%and');
+    cardinal::Grammar.O(':prec<j=>', '%or');
+    cardinal::Grammar.O(':prec<h=>', '%dotdot');
+    cardinal::Grammar.O(':prec<f=>', '%ternary');
+    cardinal::Grammar.O(':prec<d=>, :assoc<right>', '%assignment'); # lvalue?
+    cardinal::Grammar.O(':prec<b=>', '%defined');
+}
 
-proto 'infix:=' is precedence('1') is pasttype('copy') is lvalue(1)     { ... }
+token infix:sym<=>         { <sym> <O('%assignment, :pasttype<copy>')> }
 
-proto 'prefix:defined?' is looser('infix:=') { ... }
+token prefix:sym<defined?> { <sym> <O('%defined')> }
 
-proto 'infix:+=' is equiv('infix:=')
-                 { ... }
+token infix:sym<+=>        { <sym> <O('%assignment')> }
 
-proto 'infix:-=' is equiv('infix:=')
-                 { ... }
+token infix:sym<-=>        { <sym> <O('%assignment')> }
 
-proto 'infix:/=' is equiv('infix:=')
-                 is pirop('div')        { ... }
+token infix:sym</=>        { <sym> <O('%assignment, :pirop<div>')> }
 
-proto 'infix:*=' is equiv('infix:=')
-                 is pirop('mul')        { ... }
+token infix:sym<*=>        { <sym> <O('%assignment, :pirop<mul>')> }
 
-proto 'infix:%=' is equiv('infix:=')
-                 is pirop('mul')        { ... }
+token infix:sym<%=>        { <sym> <O('%assignment, :pirop<mul>')> }
 
-proto 'infix:|=' is equiv('infix:=')    { ... }
+token infix:sym<|=>        { <sym> <O('%assignment')> }
 
-proto 'infix:&=' is equiv('infix:=')    { ... }
+token infix:sym<&=>        { <sym> <O('%assignment')> }
 
-proto 'infix:~=' is equiv('infix:=')    { ... }
+token infix:sym<~=>        { <sym> <O('%assignment')> }
 
-proto 'infix:>>=' is equiv('infix:=')
-                  is pirop('shr')       { ... }
+token infix:sym«>>=»        { <sym> <O('%assignment, :pirop<shr>')> }
 
-proto 'infix:<<=' is equiv('infix:=')
-                  is pirop('shl')       { ... }
+token infix:sym«<<=»        { <sym> <O('%assignment, :pirop<shl>')> }
 
-proto 'infix:&&=' is equiv('infix:=')
-                  is pirop('and')       { ... }
+token infix:sym<&&=>        { <sym> <O('%assignment, :pirop<and>')> }
 
-proto 'infix:**=' is equiv('infix:=')
-                  is pirop('pow')       { ... }
+token infix:sym<**=>        { <sym> <O('%assignment, :pirop<pow>')> }
 
-proto 'ternary:? :' is tighter('infix:=')
-                    is pirop('if')      { ... }
+token infix:sym<? :>        { <sym> <O('%ternary, :reducecheck<ternary>, :pasttype<if>')> }
 
-proto 'infix:..' is tighter('ternary:? :') { ... }
-                #is parsed(&primary)     { ... }
-                 #is pirop('add')      { ... }
+token infix:sym<..>         { <sym> <O('%dotdot')> }
 
-proto 'infix:...' is equiv('infix:..') { ... }
+token infix:sym<...>        { <sym> <O('%dotdot')> }
 
-proto 'infix:||' is tighter('infix:..')
-                 is pasttype('unless')      { ... }
+token infix:sym<||>         { <sym> <O('%or, :pasttype<unless>')> }
 
-proto 'infix:&&' is tighter('infix:||')
-                 is pasttype('if')          { ... }
+token infix:sym<&&>         { <sym> <O('%and, :pasttype<if>')> }
 
+token infix:sym<==>         { <sym> <O('%equality')> }
+token infix:sym<!=>         { <sym> <O('%equality')> }
+token infix:sym<=~>         { <sym> <O('%equality')> }
+token infix:sym<!~>         { <sym> <O('%equality')> }
+token infix:sym<===>        { <sym> <O('%equality')> }
+token infix:sym«<=>»        { <sym> <O('%equality')> }
 
-proto 'infix:=='      is tighter('infix:&&') { ... }
-proto 'infix:!='      is equiv('infix:==') { ... }
-proto 'infix:=~'      is equiv('infix:==') { ... }
-proto 'infix:!~'      is equiv('infix:==') { ... }
-proto 'infix:==='     is equiv('infix:==') { ... }
-proto 'infix:<=>'     is equiv('infix:==') { ... }
+token infix:sym«>»          { <sym> <O('%cmp')> }
+token infix:sym«<»          { <sym> <O('%cmp')> }
+token infix:sym«<=»         { <sym> <O('%cmp')> }
+token infix:sym«>=»         { <sym> <O('%cmp')> }
 
+token infix:sym<|>          { <sym> <O('%bor')> }
+token infix:sym<^>          { <sym> <O('%bor')> }
 
-proto 'infix:>'  is tighter('infix:===') { ... }
-proto 'infix:<'  is equiv('infix:>') { ... }
-proto 'infix:<=' is equiv('infix:>') { ... }
-proto 'infix:>=' is equiv('infix:>') { ... }
+token infix:sym<&>          { <sym> <O('%band')> }
 
-proto 'infix:|' is tighter('infix:<=')  { ... }
-proto 'infix:^' is equiv('infix:|')  { ... }
+token infix:sym«<<»         { <sym> <O('%bsh')> }
+token infix:sym«<>»         { <sym> <O('%bsh')> }
 
-proto 'infix:&' is tighter('infix:|')  { ... }
+token infix:sym<+>          { <sym> <O('%plusminus')> }
+token infix:sym<->          { <sym> <O('%plusminus')> }
 
-proto 'infix:<<'  is tighter('infix:&') { ... }
-proto 'infix:>>'  is equiv('infix:<<') { ... }
+token infix:sym<*>          { <sym> <O('%muldiv')> }
+token infix:sym</>          { <sym> <O('%muldiv')> }
+token infix:sym<%>          { <sym> <O('%muldiv, :pirop<mod>')> }
 
-proto 'infix:+' is tighter('infix:<<')  { ... }
+#token 'prefix:+' is tighter('infix:*')  { ... }
+#token 'prefix:-' is equiv('prefix:+')  { ... }
+#token 'prefix:!' is equiv('prefix:+')  { ... }
+#token 'prefix:~' is equiv('prefix:+')  { ... }
 
-proto 'infix:-' is equiv('infix:+') { ... }
-                #is pirop('sub')       { ... }
+#TODO
+#token 'term:'   is tighter('infix:*')
+#                is parsed(&primary)     { ... }
 
-proto 'infix:*' is tighter('infix:+') { ... }
-                #is pirop('mul')       { ... }
-
-proto 'infix:/' is equiv('infix:*')  { ... }
-                #is pirop('div')       { ... }
-
-proto 'infix:%' is equiv('infix:*')
-                is pirop('mod')       { ... }
-
-#proto 'prefix:+' is tighter('infix:*')  { ... }
-#proto 'prefix:-' is equiv('prefix:+')  { ... }
-#proto 'prefix:!' is equiv('prefix:+')  { ... }
-#proto 'prefix:~' is equiv('prefix:+')  { ... }
-
-proto 'term:'   is tighter('infix:*')
-                is parsed(&primary)     { ... }
-
-proto 'circumfix:( )' is equiv('term:') { ... }
+#token 'circumfix:( )' is equiv('term:') { ... }
