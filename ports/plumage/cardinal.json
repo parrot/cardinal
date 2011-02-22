@@ -6,7 +6,7 @@
     "general"      : {
         "name"     : "cardinal",
         "abstract" : "Cardinal - Ruby compiler for Parrot",
-        "authority": "http://github.com/cardinal",
+        "authority": "http://github.com/parrot/cardinal",
         "version"  : "HEAD",
         "license"  : {
             "type" : "Artistic License 2.0",
@@ -56,9 +56,9 @@
     "resources"            : {
         "repository"       : {
              "type"        : "git",
-             "checkout_uri": "git://github.com/cardinal/cardinal.git",
-             "browser_uri" : "http://github.com/cardinal/cardinal",
-             "project_uri" : "http://github.com/cardinal/cardinal"
+             "checkout_uri": "git://github.com/parrot/cardinal.git",
+             "browser_uri" : "http://github.com/parrot/cardinal",
+             "project_uri" : "http://github.com/parrot/cardinal"
         }
     }
 }
