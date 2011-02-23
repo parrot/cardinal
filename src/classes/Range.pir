@@ -74,10 +74,10 @@ Determines if topic is within the range or equal to the range.
     goto true
 
   value_in_range_check:
-    $I0 = self.'!from_test'(topic)
-    unless $I0 goto false
-    $I0 = self.'!to_test'(topic)
-    unless $I0 goto false
+    $P3 = self.'!from_test'(topic)
+    unless $P3, false
+    $P3 = self.'!to_test'(topic)
+    unless $P3, false
 
   true:
     $P0 = get_hll_global 'true'
@@ -129,6 +129,7 @@ Gets the beginning or end of the range.
 =cut
 
 .sub 'to_a' :method
+    print "to_a\n"
     $P0 = self.'list'()
     .return ($P0)
 .end
@@ -137,7 +138,7 @@ Gets the beginning or end of the range.
    $P0 = getattribute self, '$!from_exclusive'
    $P1 = getattribute self, '$!to_exclusive'
    $P2 = $P0 && $P1
-   if $P2 > 0 goto build_exclusive
+   if $P2, build_exclusive
    $S0 = '..'
    goto build_return
    build_exclusive:
@@ -161,6 +162,7 @@ iterators, we can just return a clone.
 =cut
 
 .sub 'iterator' :method :vtable('get_iter')
+    print "iterator\n"
     $P0 = clone self
     .return ($P0)
 .end
@@ -176,14 +178,21 @@ just return a clone of the CardinalRange.
 
 .sub 'list' :method
     .local pmc range_it, result
+    say "list"
     range_it = self.'iterator'()
+    say "after iterator"
     result = new 'CardinalArray'
   range_loop:
+    say "start loop"
     unless range_it goto range_end
+    say "true here"
     $P0 = shift range_it
+    say "P0"
+    say $P0
     push result, $P0
     goto range_loop
   range_end:
+    say "end loop"
     .return (result)
 .end
 
@@ -265,18 +274,14 @@ Return true if the parameter is located with this CardinalRange
   $P0 = self.'from'()
   $P1 = self.'to'()
 
-  $I0 = self.'!from_test'(test)
-  if $I0 == 0 goto out_of_bounds
-  $I0 = self.'!to_test'(test)
-  if $I0 == 0 goto out_of_bounds
-  #if test <= $P0 goto out_of_bounds
-  #if test >= $P1 goto out_of_bounds
+  $P2 = self.'!from_test'(test)
+  unless $P2, out_of_bounds
+  $P2 = self.'!to_test'(test)
+  unless $P2, out_of_bounds
   $P3 = get_hll_global 'true'
   .return ($P3)
   out_of_bounds:
       $P3 = get_hll_global 'false'
-      #say 'out of bounds'
-      #throw 'out of bounds!'
       .return ($P3)
 .end
 
@@ -307,8 +312,8 @@ Generate the next element at the end of the CardinalRange.
     unless toexc goto have_value
     value = clone to
   have_value:
-    $I0 = self.'!from_test'(value)
-    if $I0 goto success
+    $P0 = self.'!from_test'(value)
+    if $P0, success
     #value = '!FAIL'('Undefined value popped from empty range')
     value = new 'Undef'
   success:
@@ -324,15 +329,16 @@ Generate the next element at the front of the CardinalRange.
 
 .sub 'shift' :method :vtable('shift_pmc')
     .local pmc from, fromexc, value
+    print "shift\n"
     from = getattribute self, '$!from'
     fromexc = getattribute self, '$!from_exclusive'
     value = clone from
     inc from
-    unless fromexc > 0 goto have_value
+    unless fromexc, have_value
     value = clone from
   have_value:
-    $I0 = self.'!to_test'(value)
-    if $I0 goto success
+    $P0 = self.'!to_test'(value)
+    if $P0, success
     #value = '!FAIL'('Undefined value shifted from empty range')
     value = new 'Undef'
   success:
@@ -347,46 +353,39 @@ Return true if there are any more values to iterate over.
 =cut
 
 .sub 'true' :method :vtable('get_bool')
-    .local pmc from, fromexc
-    from = getattribute self, '$!from'
-    fromexc = getattribute self, '$!from_exclusive'
-    unless fromexc > 0 goto have_value
-    from = clone from
-    inc from
-  have_value:
-    $I0 = self.'!to_test'(from)
-    .return ($I0)
+    say "true method"
+    $P0 = getattribute self, '$!from'
+    $P1 = self.'!to_test'($P0)
+    say "P1"
+    say $P1
+    .return ($P1)
 .end
 
 
 .sub 'initialize' :method :multi(_)
     .param pmc hash :named :slurpy
-    $P1 = hash["$!from_exclusive"]
-    defined $I0, $P1
-    $I0 = !$I0
-    if $I0 goto default
-    setattribute self, '$!from_exclusive', $P1
-    $P2 = hash["$!to_exclusive"]
-    setattribute self, '$!to_exclusive', $P2
+    $P0 = get_hll_global 'false'
+    $P1 = get_hll_global 'true'
+    $P2 = hash["$!from_exclusive"]
+    unless $P2, default
+    setattribute self, '$!from_exclusive', $P0
+    setattribute self, '$!to_exclusive', $P1
     goto finish
-    default:
-        $P0 = new 'CardinalInteger'
-        $P0 = 0
-        setattribute self, '$!from_exclusive', $P0
-        setattribute self, '$!to_exclusive', $P0
-        goto finish
-    finish:
-        $P3 = hash["$!from"]
-        setattribute self, '$!from', $P3
-        $P4 = hash["$!to"]
-        setattribute self, '$!to', $P4
+  default:
+    setattribute self, '$!from_exclusive', $P0
+    setattribute self, '$!to_exclusive', $P0
+    goto finish
+  finish:
+    $P3 = hash["$!from"]
+    setattribute self, '$!from', $P3
+    $P4 = hash["$!to"]
+    setattribute self, '$!to', $P4
 .end
 
 .sub 'initialize' :method :multi(_,_,_)
     .param pmc from
     .param pmc to
-    $P0 = new 'CardinalInteger'
-    $P0 = 0
+    $P0 = get_hll_global 'false'
     setattribute self, '$!from_exclusive', $P0
     setattribute self, '$!to_exclusive', $P0
     setattribute self, '$!from', from
@@ -442,9 +441,10 @@ Construct a range from the endpoints.
 .sub 'infix:..'
     .param pmc from
     .param pmc to
-    .local pmc proto
+    .local pmc proto, false
     proto = get_hll_global 'CardinalRange'
-    $P1 = proto.'new'('$!from'=>from, '$!to'=>to)
+    false = get_hll_global 'false'
+    $P1 = proto.'new'('$!from'=>from, '$!to'=>to, '$!from_exclusive'=>false, '$!to_exclusive'=>false)
     .return ($P1)
 .end
 
@@ -480,12 +480,12 @@ honoring exclusive flags.
     .local pmc from, fromexc
     from = getattribute self, '$!from'
     fromexc = getattribute self, '$!from_exclusive'
-    if fromexc > 0 goto exclusive_test
+    if fromexc, exclusive_test
     $I0 = isge topic, from
-    .return ($I0)
+    .tailcall 'bool'($I0)
   exclusive_test:
     $I0 = isgt topic, from
-    .return ($I0)
+    .tailcall 'bool'($I0)
 .end
 
 .sub '!to_test' :method
@@ -500,15 +500,15 @@ honoring exclusive flags.
     $I1 = length $S1
     eq $I0, $I1, test_value
     $I0 = islt $I0, $I1
-    .return ($I0)
+    .tailcall 'bool'($I0)
   test_value:
     toexc = getattribute self, '$!to_exclusive'
-    if toexc > 0 goto exclusive_test
+    if toexc, exclusive_test
     $I0 = isle topic, to
-    .return ($I0)
+    .tailcall 'bool'($I0)
   exclusive_test:
     $I0 = islt topic, to
-    .return ($I0)
+    .tailcall 'bool'($I0)
 .end
 
 =back
