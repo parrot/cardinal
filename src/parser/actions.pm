@@ -892,7 +892,7 @@ sub is_a_sub($name) {
             return 1;
         }
         else {
-            return0;
+            return 0;
         }
     }
     for @?BLOCK {
