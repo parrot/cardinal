@@ -23,3 +23,6 @@ build.yaml
 t/*/gen_*.pir
 t/gen_*.pir
 *.*~
+
+ctags_opt
+tags
