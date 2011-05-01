@@ -12,6 +12,7 @@ CLEAN.include('report')
 CLOBBER.include('cardinal')
 CLOBBER.include('*.pbc')
 CLOBBER.include('report.tar.gz')
+CLOBBER.include(['ctags_opt', 'tags'])
 
 DEBUG = ENV['debug'] || false
 ALTERNATIVE_RUBY = ENV['test_with'] || false
@@ -360,6 +361,62 @@ file "Test.pir" => ["cardinal.pbc", "Test.rb"] do
 end
 
 task :default => ["cardinal", "Test.pir"]
+
+def get_ctags
+  ctags = `which ctags`.chomp
+
+  # any of exit statuses except 0 are fault
+  unless $?.exitstatus == 0
+    puts "Exuberant Ctags is needed to generates tags file."
+    exit 1
+  end
+
+  unless `#{ctags} --version`.scan(/Exuberant Ctags/).size > 0
+    puts "You have other version of ctags. Make sure Exuberant Ctags be current ctags instead of your own."
+    exit 1
+  end
+
+  ctags
+end
+
+namespace :tags do
+  desc "Generate ctags option file"
+  task :gen_option do
+    File.open "./ctags_opt", "w" do |f|
+      f.write "-f tags\n"
+      f.write "-R\n"
+      f.write "--totals\n"
+      f.write "--exclude=.git\n"
+      f.write "--exclude=.gitignore\n"
+      f.write "--exclude=*~\n"
+      f.write "--exclude=*.swp\n"
+      f.write "--exclude=*.rb\n"
+      f.write "--langdef=Parrot\n"
+      f.write "--langmap=Parrot:+.pir.pg.pasm.pm\n"
+      f.write "--sort=yes\n"
+      f.write '--regex-Parrot=/^\.sub[ \t]*\'?(infix:)*([a-zA-Z0-9!#$%&*+,.\/:;<=>?@^_`\{\|\}~\-]+)\'?[ \t]*.*/\2/s,subroutine,subroutines/'
+      f.write "\n"
+      f.write '--regex-Parrot=/^rule[ \t]*([a-zA-Z0-9_]+)[ \t]*(:\"[a-zA-Z0-9!#$%&*+,.\/:;<=>?@^_`\{\|\}~\-]+\"*)*/\1/r,rule,rules/'
+      f.write "\n"
+      f.write '--regex-Parrot=/^token[ \t]*([a-zA-Z0-9_]+)[ \t]*(:\"[a-zA-Z0-9!#$%&*+,.\/:;<=>?@^_`\{\|\}~\-]+\"*)*/\1/r,token,tokens/'
+    end
+    puts "ctags_opt has been created"
+  end
+
+  desc "Generate tags for vim"
+  task :vim => [:gen_option] do
+    ctags = get_ctags
+    `#{ctags} --options=ctags_opt .`
+    FileUtils.rm_f "./ctags_opt"
+  end
+
+  desc "Generate tags for emacs"
+  task :emacs => [:gen_option] do
+    ctags = get_ctags
+    `#{ctags} -e --options=ctags_opt .`
+    FileUtils.rm_f "./ctags_opt"
+  end
+end
 
 namespace :test do |ns|
     test "00-sanity.t"
