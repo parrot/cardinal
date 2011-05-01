@@ -34,7 +34,7 @@ Follow the documentations to start developing cardinal.
 
 {Latest Parrot Documentation}[http://docs.parrot.org/parrot/latest/html/index.html]
 
-{Parrot Babysteps}[http://docs.parrot.org/parrot/latest/html/index.html]
+{Parrot Babysteps}[http://coolnamehere.com/geekery/parrot/learn/]
 
 Cardinal is back in active development, under the stewardship of Ted Reed <ted.reed@gmail.com>.
 
