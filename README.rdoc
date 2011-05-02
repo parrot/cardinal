@@ -6,19 +6,38 @@ The parser is fairly complete.  The standard library exists, but still needs fil
 
 Cardinal's parser is very *very* slow. You can precompile to PIR with --target=pir and run the result with Parrot directly to skip the parsing phase. (You may need cardinal.pbc in the same directory for this to work.)
 
-== Building from source
+== Getting Started with Cardinal
 
-1. Downloading Cardinal
+=== Downloding Cardinal
+
+Get a copy of Cardinal(read only):
 
     git clone git://github.com/parrot/cardinal.git
 
-2. After obtaining the source code, run:
+=== Build with Rake
+
+After obtaining the source code, run:
 
     rake cardinal
 
-3. To run some tests run:
+To run some tests run:
 
     rake test:all
+    rake test:[name]
+
+You might get all rake tasks with:
+
+    rake -T
+
+=== Build with Parrot
+
+You can also build cardinal with Parrot:
+
+    parrot setup.pir
+
+Testing:
+
+    parrot setup.pir test
 
 Note that some of them will probably fail, as Cardinal is not yet complete
 
