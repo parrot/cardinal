@@ -18,6 +18,13 @@ DEBUG = ENV['debug'] || false
 ALTERNATIVE_RUBY = ENV['test_with'] || false
 PARROT_CONFIG = ENV["PARROT_CONFIG"] || 'parrot_config'
 $config = {} 
+$location = {
+    :parrot => "/parrot",
+    :perl6grammar => "/runtime/parrot/library/PGE/Perl6Grammar.pbc",
+    :nqp => "/runtime/parrot/library/nqp-rx.pbc",
+    :pct => "/runtime/parrot/library/PCT.pbc",
+    :pbc_to_exe => "/pbc_to_exe"
+}
 $tests = 0
 $test_files = 0
 $ok = 0
@@ -273,11 +280,21 @@ task :config => "build.yaml" do
     File.open("build.yaml","r") do |f|
         $config.update(YAML.load(f))
     end
-    return false unless File.exist?($config[:parrot])
-    return false unless File.exist?($config[:perl6grammar])
-    return false unless File.exist?($config[:nqp])
-    return false unless File.exist?($config[:pct])
-    return false unless File.exist?($config[:pbc_to_exe])
+
+    puts "Configuring..."
+    puts "build_dir is #{$config[:build_dir]}"
+    err_msg = []
+
+    err_msg << $location[:parrot] unless File.exist?($config[:parrot])
+    err_msg << $location[:perl6grammar] unless File.exist?($config[:perl6grammar])
+    err_msg << $location[:nqp] unless File.exist?($config[:nqp])
+    err_msg << $location[:pct] unless File.exist?($config[:pct])
+    err_msg << $location[:pbc_to_exe] unless File.exist?($config[:pbc_to_exe])
+
+    if err_msg.size > 0
+      err_msg = err_msg.map {|c| 'build_dir' + c + ' does not exist'}
+      abort "aborted!\n" + err_msg.join("\n")
+    end
 end
 
 def get_arch
@@ -311,11 +328,11 @@ file "build.yaml" do
     print PARROT_CONFIG == 'parrot_config' ? "Detected " : "Provided "
     puts "parrot_config reports that build_dir is #{$config[:build_dir]}."
 
-    $config[:parrot] = $config[:build_dir] + "/parrot"
-    $config[:perl6grammar] = $config[:build_dir] + "/runtime/parrot/library/PGE/Perl6Grammar.pbc"
-    $config[:nqp] = $config[:build_dir] + "/runtime/parrot/library/nqp-rx.pbc"
-    $config[:pct] = $config[:build_dir] + "/runtime/parrot/library/PCT.pbc"
-    $config[:pbc_to_exe] = $config[:build_dir] + "/pbc_to_exe"
+    $config[:parrot] = $config[:build_dir] + $location[:parrot]
+    $config[:perl6grammar] = $config[:build_dir] + $location[:perl6grammar]
+    $config[:nqp] = $config[:build_dir] + $location[:nqp]
+    $config[:pct] = $config[:build_dir] + $location[:pct]
+    $config[:pbc_to_exe] = $config[:build_dir], $location[:pbc_to_exe]
 
     File.open("build.yaml","w") do |f|
         YAML.dump($config, f) 
@@ -392,7 +409,7 @@ namespace :tags do
       f.write "--exclude=*.swp\n"
       f.write "--exclude=*.rb\n"
       f.write "--langdef=Parrot\n"
-      f.write "--langmap=Parrot:+.pir.pg.pasm.pm\n"
+      f.write "--langmap=Parrot:+.pir.pg.pasm.pmc\n"
       f.write "--sort=yes\n"
       f.write '--regex-Parrot=/^\.sub[ \t]*\'?(infix:)*([a-zA-Z0-9!#$%&*+,.\/:;<=>?@^_`\{\|\}~\-]+)\'?[ \t]*.*/\2/s,subroutine,subroutines/'
       f.write "\n"
