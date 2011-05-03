@@ -332,7 +332,7 @@ file "build.yaml" do
     $config[:perl6grammar] = $config[:build_dir] + $location[:perl6grammar]
     $config[:nqp] = $config[:build_dir] + $location[:nqp]
     $config[:pct] = $config[:build_dir] + $location[:pct]
-    $config[:pbc_to_exe] = $config[:build_dir], $location[:pbc_to_exe]
+    $config[:pbc_to_exe] = $config[:build_dir] + $location[:pbc_to_exe]
 
     File.open("build.yaml","w") do |f|
         YAML.dump($config, f) 
@@ -527,9 +527,10 @@ namespace :test do |ns|
         test "integer/integer.t"
         test "integer/times.t"
         test "integer/cmp.t"
+        test "integer/pred.t"
 
         desc "Run tests on Integer."
-        task :all => [:integer, :times, :cmp]
+        task :all => [:integer, :times, :cmp, :pred]
     end
 
     namespace :kernel do
