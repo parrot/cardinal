@@ -332,7 +332,7 @@ file "build.yaml" do
     $config[:perl6grammar] = $config[:build_dir] + $location[:perl6grammar]
     $config[:nqp] = $config[:build_dir] + $location[:nqp]
     $config[:pct] = $config[:build_dir] + $location[:pct]
-    $config[:pbc_to_exe] = $config[:build_dir], $location[:pbc_to_exe]
+    $config[:pbc_to_exe] = $config[:build_dir] + $location[:pbc_to_exe]
 
     File.open("build.yaml","w") do |f|
         YAML.dump($config, f) 
