@@ -222,6 +222,18 @@ Return C<self> plus 1
   .return ($P1)
 .end
 
+=item pred()
+
+Return C<self> mius 1
+
+=cut
+
+.sub 'pred' :method
+    $P0 = new 'CardinalInteger'
+    $P0 = 1
+    $P1 = 'infix:-'(self, $P0)
+    .return ($P1)
+.end
 
 =back
 
