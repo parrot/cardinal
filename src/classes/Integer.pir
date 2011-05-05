@@ -224,7 +224,7 @@ Return C<self> plus 1
 
 =item pred()
 
-Return C<self> mius 1
+Return C<self> minus 1
 
 =cut
 
@@ -233,6 +233,56 @@ Return C<self> mius 1
     $P0 = 1
     $P1 = 'infix:-'(self, $P0)
     .return ($P1)
+.end
+
+=item chr()
+
+Return a string represented by C<self>
+
+=cut
+
+.sub 'chr' :method
+    .param pmc enc :optional
+    .param int has_enc :opt_flag
+    .local int val
+    .local string tmp
+    .local pmc rst
+
+    val = self
+
+    if has_enc goto decode
+    if val > 0xff goto decode
+    if val >= 0x80 goto str_conv
+    if val < 0x00 goto range_error
+
+  ascii:
+    tmp = ''
+    chr tmp, val
+    rst = new 'CardinalString'
+    rst = tmp
+    goto done
+
+  str_conv:
+    rst = new 'CardinalString'
+    rst = rst.'new'(val)
+    goto done
+
+  decode:
+    # TODO:
+    #
+    # if has_enc : get encoding with enc. goto ascii when if enc is not valid 
+    # if internal encoding is not null: decode with internal encoding
+    # if internal encoding is null: goto RangeError
+    print "Not Yet Implemented\n"
+
+  range_error:
+    # TODO:
+    # payload in Exception
+    $P0 = new 'RangeError'
+    throw $P0
+
+  done:
+    .return (rst)
 .end
 
 =back
