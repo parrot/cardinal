@@ -529,9 +529,10 @@ namespace :test do |ns|
         test "integer/cmp.t"
         test "integer/pred.t"
         test "integer/chr.t"
+        test "integer/ord.t"
 
         desc "Run tests on Integer."
-        task :all => [:integer, :times, :cmp, :pred, :chr]
+        task :all => [:integer, :times, :cmp, :pred, :ord]
     end
 
     namespace :kernel do

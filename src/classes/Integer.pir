@@ -79,8 +79,8 @@ to_i()
 to_int()
 floor()
 ceil()
-round()
 truncate()
+ord()
 
 All return C<self>
 
@@ -102,16 +102,16 @@ All return C<self>
     .return(self)
 .end
 
-.sub 'round' :method
-    .return(self)
-.end
-
 .sub 'truncate' :method
     .return(self)
 .end
 
 .sub 'numerator' :method
     .return(self)
+.end
+
+.sub 'ord' :method
+    .return (self)
 .end
 
 =item
@@ -283,6 +283,22 @@ Return a string represented by C<self>
 
   done:
     .return (rst)
+.end
+
+=item round()
+
+Round at given precision
+
+=cut
+
+.sub 'round' :method
+    .param pmc ndigits :optional
+    .param int has_ndigits :opt_flag
+
+    # TODO
+    # not yet impletmented
+
+    .return(self)
 .end
 
 =back
