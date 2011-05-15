@@ -1371,7 +1371,7 @@ Retrieve the number of elements in C<self>
 
     $I0 = 0 
   range_loop:
-    if $I0 > count goto done
+    if $I0 >= count goto done
     $I1 = $I0 + beg
     if $I1 == len goto range_outofrange
     val = a[$I1]
@@ -1536,7 +1536,7 @@ Retrieve the number of elements in C<self>
     end = r.'to'()
 
     $P0 = getattribute r, '$!to_exclusive'
-    unless $P0 goto skip_exclusive_to
+    if $P0 goto skip_exclusive_to
     inc end
 
   skip_exclusive_to:
