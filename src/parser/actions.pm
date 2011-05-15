@@ -779,7 +779,7 @@ method assoc($/) {
 }
 
 method float($/) {
-    make PAST::Val.new( :value( ~$/ ), :returns('Float'), :node($/) );
+    make PAST::Val.new( :value( ~$/ ), :returns('CardinalFloat'), :node($/) );
 }
 
 method integer($/) {

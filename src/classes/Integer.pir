@@ -20,7 +20,7 @@ CardinalInteger - Cardinal integers
 .sub 'onload' :anon :init :load
     .local pmc cardinalmeta, intproto
     cardinalmeta = get_hll_global ['CardinalObject'], '!CARDINALMETA'
-    intproto = cardinalmeta.'new_class'('CardinalInteger', 'parent'=>'parrot;Integer CardinalObject')
+    intproto = cardinalmeta.'new_class'('CardinalInteger', 'parent'=>'parrot;Integer CardinalNumeric')
     cardinalmeta.'register'('Float', 'parent'=>'CardinalObject', 'protoobject'=>intproto)
 .end
 
@@ -47,6 +47,44 @@ Returns a Perl representation of the CardinalInteger.
 .sub 'integer?' :method
   $P0 = get_hll_global 'true'
   .return($P0)
+.end
+
+=item odd?()
+
+Return true if C<self> is an odd number
+
+=cut
+
+.sub 'odd?' :method
+    $I0 = self
+    $P0 = get_hll_global 'true'
+
+    band $I0, 1
+    eq $I0, 1, done
+
+  even_num:
+    $P0 = get_hll_global 'false'
+  done:
+    .return ($P0)
+.end
+
+=item 'even?'
+
+Return true if C<self> is an even number
+
+=cut
+
+.sub 'even?' :method
+    $I0 = self
+    $P0 = get_hll_global 'true'
+
+    band $I0, 1
+    eq $I0, 0, done
+
+  odd_num:
+    $P0 = get_hll_global 'false'
+  done:
+    .return ($P0)
 .end
 
 =item _get_bool()
@@ -79,8 +117,8 @@ to_i()
 to_int()
 floor()
 ceil()
-round()
 truncate()
+ord()
 
 All return C<self>
 
@@ -102,7 +140,7 @@ All return C<self>
     .return(self)
 .end
 
-.sub 'round' :method
+.sub 'ord' :method
     .return(self)
 .end
 
@@ -224,7 +262,7 @@ Return C<self> plus 1
 
 =item pred()
 
-Return C<self> mius 1
+Return C<self> minus 1
 
 =cut
 
@@ -233,6 +271,83 @@ Return C<self> mius 1
     $P0 = 1
     $P1 = 'infix:-'(self, $P0)
     .return ($P1)
+.end
+
+=item chr()
+
+Return a string represented by C<self>
+
+=cut
+
+.sub 'chr' :method
+    .param pmc enc :optional
+    .param int has_enc :opt_flag
+    .local int val
+    .local string tmp
+    .local pmc rst
+
+    val = self
+
+    if has_enc goto decode
+    if val > 0xff goto decode
+    if val >= 0x80 goto str_conv
+    if val < 0x00 goto range_error
+
+  ascii:
+    tmp = ''
+    chr tmp, val
+    rst = new 'CardinalString'
+    rst = tmp
+    goto done
+
+  str_conv:
+    rst = new 'CardinalString'
+    rst = rst.'new'(val)
+    goto done
+
+  decode:
+    # TODO:
+    #
+    # if has_enc : get encoding with enc. goto ascii when if enc is not valid 
+    # if internal encoding is not null: decode with internal encoding
+    # if internal encoding is null: goto RangeError
+    print "Not Yet Implemented\n"
+
+  range_error:
+    # TODO:
+    # payload in Exception
+    $P0 = new 'RangeError'
+    throw $P0
+
+  done:
+    .return (rst)
+.end
+
+=item round()
+
+Round at given precision
+
+=cut
+
+# Fix me: Integer#round does not return C<self>
+.sub 'round' :method
+    .param pmc ndigits :optional
+    .param int has_ndigits :opt_flag
+    .local pmc rst
+
+    rst = self
+    unless has_ndigits goto done
+
+  positive:
+    # TODO: return C<self> as float
+  negative:
+    # TODO: raise C<self> to 10 ^ abs(ndigits)
+  range_error:
+    # TODO: capture overflow then throw RangeError
+  argv_error:
+    # TODO: capture overflow then throw ArgumentError
+  done:
+    .return (rst)
 .end
 
 =back
