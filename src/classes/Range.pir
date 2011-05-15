@@ -328,7 +328,7 @@ Generate the next element at the front of the CardinalRange.
     fromexc = getattribute self, '$!from_exclusive'
     value = clone from
     inc from
-    unless fromexc > 0 goto have_value
+    unless fromexc goto have_value
     value = clone from
   have_value:
     $I0 = self.'!to_test'(value)
@@ -350,7 +350,7 @@ Return true if there are any more values to iterate over.
     .local pmc from, fromexc
     from = getattribute self, '$!from'
     fromexc = getattribute self, '$!from_exclusive'
-    unless fromexc > 0 goto have_value
+    unless fromexc goto have_value
     from = clone from
     inc from
   have_value:
@@ -370,8 +370,7 @@ Return true if there are any more values to iterate over.
     setattribute self, '$!to_exclusive', $P2
     goto finish
     default:
-        $P0 = new 'CardinalInteger'
-        $P0 = 0
+        $P0 = new 'FalseClass'
         setattribute self, '$!from_exclusive', $P0
         setattribute self, '$!to_exclusive', $P0
         goto finish
@@ -385,8 +384,7 @@ Return true if there are any more values to iterate over.
 .sub 'initialize' :method :multi(_,_,_)
     .param pmc from
     .param pmc to
-    $P0 = new 'CardinalInteger'
-    $P0 = 0
+    $P0 = new 'FalseClass'
     setattribute self, '$!from_exclusive', $P0
     setattribute self, '$!to_exclusive', $P0
     setattribute self, '$!from', from
@@ -480,7 +478,7 @@ honoring exclusive flags.
     .local pmc from, fromexc
     from = getattribute self, '$!from'
     fromexc = getattribute self, '$!from_exclusive'
-    if fromexc > 0 goto exclusive_test
+    if fromexc goto exclusive_test
     $I0 = isge topic, from
     .return ($I0)
   exclusive_test:
@@ -503,7 +501,7 @@ honoring exclusive flags.
     .return ($I0)
   test_value:
     toexc = getattribute self, '$!to_exclusive'
-    if toexc > 0 goto exclusive_test
+    if toexc goto exclusive_test
     $I0 = isle topic, to
     .return ($I0)
   exclusive_test:

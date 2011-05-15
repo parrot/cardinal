@@ -276,7 +276,8 @@ Create a clone of self, also cloning the attributes given by attrlist.
     $S0 = shift attr_it
     unless $S0 goto attr_loop
     $P1 = getattribute self, $S0
-    unless $P1 goto set_default
+    $I0 = defined $P1
+    unless $I0 goto set_default
     $P1 = clone $P1
     setattribute result, $S0, $P1
     goto attr_loop
