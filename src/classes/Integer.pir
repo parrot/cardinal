@@ -113,10 +113,12 @@ Returns a CardinalString representation of the CardinalInteger.
 .end
 
 =item
+to_i()
 to_int()
 floor()
 ceil()
 truncate()
+ord()
 
 All return C<self>
 
@@ -135,6 +137,10 @@ All return C<self>
 .end
 
 .sub 'ceil' :method
+    .return(self)
+.end
+
+.sub 'ord' :method
     .return(self)
 .end
 
