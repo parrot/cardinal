@@ -71,6 +71,7 @@ src/classes/Object.pir
 src/classes/Exception.pir
 src/classes/NilClass.pir
 src/classes/String.pir
+src/classes/Numeric.pir
 src/classes/Integer.pir
 src/classes/Array.pir
 src/classes/Hash.pir
