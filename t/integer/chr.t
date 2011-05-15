@@ -1,7 +1,7 @@
 require 'Test'
 include Test
 
-plan 4
+plan 5
 
 exclamation = 33.chr
 is exclamation, '!'
@@ -12,8 +12,5 @@ is ua, 'A'
 tilde = 126.chr
 is tilde, '~'
 
-# TODO:
-#
-# * call chr with num over 128
-# * call chr with CardinalEncoding
-is 1, 0
+skip 'chr with internal encoding', 'pir'
+skip 'chr with Encoding opt', 'pir'

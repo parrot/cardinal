@@ -362,7 +362,7 @@ file "src/gen_actions.pir" => [:config, "src/parser/actions.pm"] do
     parrot("src/parser/actions.pm","src/gen_actions.pir",$config[:nqp],'pir')
 end
 
-builtins = FileList.new("src/builtins/guts.pir", "src/builtins/control.pir", "src/builtins/say.pir", "src/builtins/cmp.pir", "src/builtins/op.pir", "src/classes/Object.pir", "src/classes/Exception.pir", "src/classes/NilClass.pir", "src/classes/String.pir", "src/classes/Integer.pir", "src/classes/Array.pir", "src/classes/Hash.pir", "src/classes/Range.pir", "src/classes/TrueClass.pir", "src/classes/FalseClass.pir", "src/classes/Kernel.pir", "src/classes/Time.pir", "src/classes/Math.pir", "src/classes/GC.pir", "src/classes/IO.pir", "src/classes/Proc.pir", "src/classes/File.pir", "src/classes/FileStat.pir", "src/classes/Dir.pir", "src/builtins/globals.pir", "src/builtins/eval.pir", "src/classes/Continuation.pir") 
+builtins = FileList.new("src/builtins/guts.pir", "src/builtins/control.pir", "src/builtins/say.pir", "src/builtins/cmp.pir", "src/builtins/op.pir", "src/classes/Object.pir", "src/classes/Exception.pir", "src/classes/NilClass.pir", "src/classes/String.pir", "src/classes/Numeric.pir", "src/classes/Integer.pir", "src/classes/Float.pir", "src/classes/Array.pir", "src/classes/Hash.pir", "src/classes/Range.pir", "src/classes/TrueClass.pir", "src/classes/FalseClass.pir", "src/classes/Kernel.pir", "src/classes/Time.pir", "src/classes/Math.pir", "src/classes/GC.pir", "src/classes/IO.pir", "src/classes/Proc.pir", "src/classes/File.pir", "src/classes/FileStat.pir", "src/classes/Dir.pir", "src/builtins/globals.pir", "src/builtins/eval.pir", "src/classes/Continuation.pir") 
 
 file "src/gen_builtins.pir" => builtins do
     puts "Generating src/gen_builtins.pir"
@@ -529,10 +529,25 @@ namespace :test do |ns|
         test "integer/cmp.t"
         test "integer/pred.t"
         test "integer/chr.t"
-        test "integer/ord.t"
+        test "integer/odd.t"
+        test "integer/even.t"
+        test "integer/round.t"
 
         desc "Run tests on Integer."
-        task :all => [:integer, :times, :cmp, :pred, :ord]
+        task :all => [:integer, :times, :cmp, :pred, :chr, :odd, :even, :round]
+    end
+
+    namespace :numeric do
+      desc "Run tests on Numeric."
+      task :all
+    end
+
+    namespace :float do
+      test "float/to_f.t"
+      test "float/zero.t"
+
+      desc "Run tests on Float"
+      task :all => [:to_f, :zero]
     end
 
     namespace :kernel do

@@ -20,7 +20,7 @@ CardinalInteger - Cardinal integers
 .sub 'onload' :anon :init :load
     .local pmc cardinalmeta, intproto
     cardinalmeta = get_hll_global ['CardinalObject'], '!CARDINALMETA'
-    intproto = cardinalmeta.'new_class'('CardinalInteger', 'parent'=>'parrot;Integer CardinalObject')
+    intproto = cardinalmeta.'new_class'('CardinalInteger', 'parent'=>'parrot;Integer CardinalNumeric')
     cardinalmeta.'register'('Float', 'parent'=>'CardinalObject', 'protoobject'=>intproto)
 .end
 
@@ -49,6 +49,44 @@ Returns a Perl representation of the CardinalInteger.
   .return($P0)
 .end
 
+=item odd?()
+
+Return true if C<self> is an odd number
+
+=cut
+
+.sub 'odd?' :method
+    $I0 = self
+    $P0 = get_hll_global 'true'
+
+    band $I0, 1
+    eq $I0, 1, done
+
+  even_num:
+    $P0 = get_hll_global 'false'
+  done:
+    .return ($P0)
+.end
+
+=item 'even?'
+
+Return true if C<self> is an even number
+
+=cut
+
+.sub 'even?' :method
+    $I0 = self
+    $P0 = get_hll_global 'true'
+
+    band $I0, 1
+    eq $I0, 0, done
+
+  odd_num:
+    $P0 = get_hll_global 'false'
+  done:
+    .return ($P0)
+.end
+
 =item _get_bool()
 
 Return true when integers are queried about the their truth value
@@ -75,12 +113,10 @@ Returns a CardinalString representation of the CardinalInteger.
 .end
 
 =item
-to_i()
 to_int()
 floor()
 ceil()
 truncate()
-ord()
 
 All return C<self>
 
@@ -108,10 +144,6 @@ All return C<self>
 
 .sub 'numerator' :method
     .return(self)
-.end
-
-.sub 'ord' :method
-    .return (self)
 .end
 
 =item
@@ -291,14 +323,25 @@ Round at given precision
 
 =cut
 
+# Fix me: Integer#round does not return C<self>
 .sub 'round' :method
     .param pmc ndigits :optional
     .param int has_ndigits :opt_flag
+    .local pmc rst
 
-    # TODO
-    # not yet impletmented
+    rst = self
+    unless has_ndigits goto done
 
-    .return(self)
+  positive:
+    # TODO: return C<self> as float
+  negative:
+    # TODO: raise C<self> to 10 ^ abs(ndigits)
+  range_error:
+    # TODO: capture overflow then throw RangeError
+  argv_error:
+    # TODO: capture overflow then throw ArgumentError
+  done:
+    .return (rst)
 .end
 
 =back
