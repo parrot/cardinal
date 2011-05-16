@@ -73,6 +73,7 @@ src/classes/NilClass.pir
 src/classes/String.pir
 src/classes/Numeric.pir
 src/classes/Integer.pir
+src/classes/Float.pir
 src/classes/Array.pir
 src/classes/Hash.pir
 src/classes/Range.pir
