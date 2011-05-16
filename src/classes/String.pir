@@ -841,7 +841,7 @@ Should replace vec with declared arrays of bit, uint2, uint4, etc.
 .sub 'infix:<<' :multi('CardinalString',_)
     .param pmc s
     .param pmc item
-    s = concat s, item
+    s.'concat'(item)
     .return(s)
 .end
 
