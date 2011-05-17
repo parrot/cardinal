@@ -1,7 +1,7 @@
 require 'Test'
 include Test
 
-plan 5
+plan 6
 
 a = 1.0
 b = a == 1
@@ -16,9 +16,5 @@ f = e == 2
 is f, false
 
 skip '.==', 'parser'
-
-i = 1.0
-j = i === 1
-is j, true
-
+skip '===', 'parser'
 skip '.===', 'parser'
