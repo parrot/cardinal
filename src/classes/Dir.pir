@@ -23,6 +23,8 @@ Perform initializations and create the Dir class
     .local pmc cardinalmeta
     $P0 = get_hll_global ['CardinalObject'], '!CARDINALMETA'
     cardinalmeta = $P0.'new_class'('Dir', 'parent'=>'CardinalObject', 'attr'=>'!umask')
+    # XXX Throw some sort of runtime exception unless loadlib succeeded
+    $P1 = loadlib 'os'
 .end
 
 #.sub 'new' :method

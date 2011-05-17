@@ -26,6 +26,8 @@ Perform initializations and create the File Stat class
     $P0 = get_hll_global ['CardinalObject'], '!CARDINALMETA'
     cardinalmeta = $P0.'new_class'('FileStat', 'parent'=>'CardinalObject', 'attr'=>'!path')
     #$P0.'register'('File', 'parent'=>'CardinalObject', 'protoobject'=>cardinalmeta)
+    # XXX Throw some sort of runtime exception unless loadlib succeeded
+    $P1 = loadlib 'os'
 .end
 
 .sub 'get_bool' :vtable
