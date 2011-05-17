@@ -23,6 +23,71 @@ initialize CardinalFloat and it's inheritance
     cardinalmeta.'register'('Float', 'parent'=>'CardinalObject', 'protoobject'=>floatproto)
 .end
 
+=item 
+
+infix:== :method
+infix:=== :method
+
+return true if C<self> and other has same value
+
+=cut
+
+.sub 'infix:==' :method
+    .param pmc other
+
+    $N0 = self
+    $N1 = other
+    eq $N0, $N1, same_at
+
+  not_same:
+    $P0 = get_hll_global 'false'
+    goto done
+  same_at:
+    $P0 = get_hll_global 'true'
+  done:
+    .return ($P0)
+.end
+
+.sub 'infix:===' :method
+    .param pmc other
+
+    $N0 = self
+    $N1 = other
+    eq $N0, $N1, same_at
+
+  not_same:
+    $P0 = get_hll_global 'false'
+    goto done
+  same_at:
+    $P0 = get_hll_global 'true'
+  done:
+    .return ($P0)
+.end
+
+=item eql?() :method
+
+return true if C<self> and other have same type and same value
+
+=cut
+
+.sub 'eql?' :method
+    .param pmc other
+
+    typeof $S0, other
+    ne $S0, 'CardinalFloat', not_same
+    $N0 = self
+    $N1 = other
+    eq $N0, $N1, same_at
+
+  not_same:
+    $P0 = get_hll_global 'false'
+    goto done
+  same_at:
+    $P0 = get_hll_global 'true'
+  done:
+    .return ($P0)
+.end
+
 =item to_f()
 
 return C<self>

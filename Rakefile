@@ -545,9 +545,11 @@ namespace :test do |ns|
     namespace :float do
       test "float/to_f.t"
       test "float/zero.t"
+      test "float/eql.t"
+      test "float/flo_eq.t"
 
       desc "Run tests on Float"
-      task :all => [:to_f, :zero]
+      task :all => [:to_f, :zero, :eql, :flo_eq]
     end
 
     namespace :kernel do
