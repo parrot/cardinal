@@ -17,11 +17,11 @@ src/classes/CardinalRange.pir - methods for the CardinalRange class
 .sub 'onload' :anon :load :init
     .local pmc meta, proto
     meta = get_hll_global ['CardinalObject'], '!CARDINALMETA'
-    proto = meta.'new_class'('CardinalRange', 'parent'=>'CardinalObject', 'attr'=>'$!from $!to $!from_exclusive $!to_exclusive')
+    proto = meta.'new_class'('CardinalRange', 'parent'=>'CardinalObject', 'attr'=>'$!from $!to $!exclusive')
     #meta.'register'('CardinalRange', 'CardinalObject', 'protoobject'=>proto)
 .end
 
-=item VTABLE_get integer (vtable method)
+=item VTABLE_get_integer (vtable method)
 
 =item VTABLE_get_number (vtable method)
 
@@ -65,11 +65,9 @@ Determines if topic is within the range or equal to the range.
     $I0 = self.'to'()
     $I1 = topic.'to'()
     if $I0 != $I1 goto false
-    $P0 = getattribute self, "$!from_exclusive"
-    $P1 = getattribute topic, "$!from_exclusive"
     if $P0 != $P1 goto false
-    $P0 = getattribute self, "$!to_exclusive"
-    $P1 = getattribute topic, "$!to_exclusive"
+    $P0 = getattribute self, "$!exclusive"
+    $P1 = getattribute topic, "$!exclusive"
     if $P0 != $P1 goto false
     goto true
 
@@ -80,10 +78,10 @@ Determines if topic is within the range or equal to the range.
     unless $I0 goto false
 
   true:
-    $P0 = get_hll_global 'true'
+    $P0 = new 'TrueClass'
     .return ($P0)
   false:
-    $P0 = get_hll_global 'false'
+    $P0 = new 'FalseClass'
     .return ($P0)
 .end
 
@@ -95,7 +93,7 @@ Create a clone of the CardinalRange.
 =cut
 
 .sub 'clone' :method :vtable
-     $P0 = self.'!cloneattr'('$!from $!to $!from_exclusive $!to_exclusive')
+     $P0 = self.'!cloneattr'('$!from $!to $!exclusive')
      .return ($P0)
 .end
 
@@ -124,7 +122,7 @@ Gets the beginning or end of the range.
 
 =item to_a
 
- Generates and returns this range as an array. This will eventually be refactored w/ the other Enumerable methods This will eventually be refactored w/ the other Enumerable methods.
+Generates and returns this range as an array. This will eventually be refactored with the other Enumerable methods.
 
 =cut
 
@@ -134,28 +132,27 @@ Gets the beginning or end of the range.
 .end
 
 .sub 'to_s' :method
-   $P0 = getattribute self, '$!from_exclusive'
-   $P1 = getattribute self, '$!to_exclusive'
-   $P2 = $P0 && $P1
-   if $P2 > 0 goto build_exclusive
+   $P0 = getattribute self, '$!exclusive'
+   if $P0 goto build_exclusive
    $S0 = '..'
    goto build_return
-   build_exclusive:
-      $S0 = '...'
-      goto build_return
-   build_return:
-      $P0 = getattribute self, '$!from'
-      $P1 = getattribute self, '$!to'
-      $P3 = new 'CardinalString'
-      $P3.'concat'($P0)
-      $P3.'concat'($S0)
-      $P3.'concat'($P1)
-      .return ($P3)
+
+ build_exclusive:
+   $S0 = '...'
+
+ build_return:
+   $P0 = getattribute self, '$!from'
+   $P1 = getattribute self, '$!to'
+   $P3 = new 'CardinalString'
+   $P3.'concat'($P0)
+   $P3.'concat'($S0)
+   $P3.'concat'($P1)
+   .return ($P3)
 .end
 
 =item iterator()  (vtable method)
 
-Return an iterator for the CardinalRange.  Since CardinalRanges are already
+Return an iterator for the CardinalRange. Since CardinalRanges are already
 iterators, we can just return a clone.
 
 =cut
@@ -188,36 +185,43 @@ just return a clone of the CardinalRange.
 .end
 
 
-=item min()
-
-=item minmax()
-
-=item max()
-
-=cut
-
 .namespace ['CardinalRange']
 
-=item
- Return first element in CardinalRange. Will later be refactored as part of the Enumerable module.
+=item min()
+
+Return first element in CardinalRange. Will later be refactored as part of the Enumerable module.
+
 =cut
+
 .sub 'min' :method
     .tailcall self.'from'()
 .end
 
-=item
- Return first element in CardinalRange.
+=item begin()
+
+Return first element in CardinalRange.
+
 =cut
+
 .sub 'begin' :method
     .tailcall self.'from'()
 .end
 
-=item
- Return first element in CardinalRange.
+=item first()
+
+Return first element in CardinalRange.
+
 =cut
+
 .sub 'first' :method
     .tailcall self.'from'()
 .end
+
+=item minmax()
+
+Return the first and the last element in CardinalRange as a list.
+
+=cut
 
 .sub 'minmax' :method
     $P0 = self.'from'()
@@ -226,40 +230,55 @@ just return a clone of the CardinalRange.
     .tailcall $P2($P0, $P1)
 .end
 
-=item
- Return last element in CardinalRange. Will later be refactored as part of the Enumerable module.
+=item max()
+
+Return last element in CardinalRange. Will later be refactored as part of the Enumerable module.
+
 =cut
+
 .sub 'max' :method
     .tailcall self.'to'()
 .end
 
-=item
- Return last element in CardinalRange.
+=item last()
+
+Return last element in CardinalRange.
+
 =cut
+
 .sub 'last' :method
     .tailcall self.'to'()
 .end
 
-=item
- Return last element in CardinalRange.
+=item end()
+
+Return last element in CardinalRange.
+
 =cut
+
 .sub 'end' :method
     .tailcall self.'to'()
 .end
 
-=item
-Return true if the parameter is located with this CardinalRange
+=item covers?()
+
+Return true if the parameter is located within this CardinalRange
+
 =cut
+
 .sub 'covers?' :method
    .param pmc test
    $P0 = self.'include?'(test)
    .return ($P0)
 .end
 
-=item
-Return true if the parameter is located with this CardinalRange
-1.9 does a succ on the last element if it isnt a integer, so this doesnt work
+=item include?()
+
+Return true if the parameter is located within this CardinalRange
+1.9 does a succ on the last element if it isn't a integer, so this doesn't work
+
 =cut
+
 .sub 'include?' :method
   .param pmc test
   $P0 = self.'from'()
@@ -269,18 +288,15 @@ Return true if the parameter is located with this CardinalRange
   if $I0 == 0 goto out_of_bounds
   $I0 = self.'!to_test'(test)
   if $I0 == 0 goto out_of_bounds
-  #if test <= $P0 goto out_of_bounds
-  #if test >= $P1 goto out_of_bounds
-  $P3 = get_hll_global 'true'
+  $P3 = new 'TrueClass'
   .return ($P3)
-  out_of_bounds:
-      $P3 = get_hll_global 'false'
-      #say 'out of bounds'
-      #throw 'out of bounds!'
-      .return ($P3)
+
+out_of_bounds:
+  $P3 = new 'FalseClass'
+  .return ($P3)
 .end
 
-=item
+=item member?()
 
 Return C<true> if the parameter is a member of this CardinalRange
 
@@ -288,10 +304,8 @@ Return C<true> if the parameter is a member of this CardinalRange
 
 .sub 'member?' :method
    .param pmc test
-   $P0 = self.'include?'(test)
-   .return ($P0)
+   .tailcall self.'include?'(test)
 .end
-
 
 =item pop()  (vtable_method)
 
@@ -300,11 +314,11 @@ Generate the next element at the end of the CardinalRange.
 =cut
 
 .sub 'pop' :method :vtable('pop_pmc')
-    .local pmc to, toexc, value
+    .local pmc to, exc, value
     to = getattribute self, '$!to'
-    toexc = getattribute self, '$!to_exclusive'
+    exc = getattribute self, '$!exclusive'
     value = 'postfix:--'(to)
-    unless toexc goto have_value
+    unless exc goto have_value
     value = clone to
   have_value:
     $I0 = self.'!from_test'(value)
@@ -315,7 +329,6 @@ Generate the next element at the end of the CardinalRange.
     .return (value)
 .end
 
-
 =item shift()   (vtable_method)
 
 Generate the next element at the front of the CardinalRange.
@@ -323,14 +336,10 @@ Generate the next element at the front of the CardinalRange.
 =cut
 
 .sub 'shift' :method :vtable('shift_pmc')
-    .local pmc from, fromexc, value
+    .local pmc from, value
     from = getattribute self, '$!from'
-    fromexc = getattribute self, '$!from_exclusive'
     value = clone from
     inc from
-    unless fromexc goto have_value
-    value = clone from
-  have_value:
     $I0 = self.'!to_test'(value)
     if $I0 goto success
     #value = '!FAIL'('Undefined value shifted from empty range')
@@ -339,7 +348,6 @@ Generate the next element at the front of the CardinalRange.
     .return (value)
 .end
 
-
 =item true()
 
 Return true if there are any more values to iterate over.
@@ -347,48 +355,47 @@ Return true if there are any more values to iterate over.
 =cut
 
 .sub 'true' :method :vtable('get_bool')
-    .local pmc from, fromexc
+    .local pmc from
     from = getattribute self, '$!from'
-    fromexc = getattribute self, '$!from_exclusive'
-    unless fromexc goto have_value
-    from = clone from
-    inc from
-  have_value:
-    $I0 = self.'!to_test'(from)
-    .return ($I0)
+    .tailcall self.'!to_test'(from)
 .end
-
 
 .sub 'initialize' :method :multi(_)
     .param pmc hash :named :slurpy
-    $P1 = hash["$!from_exclusive"]
+    $P1 = hash["$!exclusive"]
     defined $I0, $P1
-    $I0 = !$I0
-    if $I0 goto default
-    setattribute self, '$!from_exclusive', $P1
-    $P2 = hash["$!to_exclusive"]
-    setattribute self, '$!to_exclusive', $P2
-    goto finish
-    default:
-        $P0 = new 'FalseClass'
-        setattribute self, '$!from_exclusive', $P0
-        setattribute self, '$!to_exclusive', $P0
-        goto finish
-    finish:
-        $P3 = hash["$!from"]
-        setattribute self, '$!from', $P3
-        $P4 = hash["$!to"]
-        setattribute self, '$!to', $P4
+    if $I0 goto finish
+    $P1 = new 'FalseClass'
+  finish:
+    $P2 = hash["$!from"]
+    setattribute self, '$!from', $P2
+    $P3 = hash["$!to"]
+    setattribute self, '$!to', $P3
+    setattribute self, '$!exclusive', $P1
 .end
 
 .sub 'initialize' :method :multi(_,_,_)
     .param pmc from
     .param pmc to
     $P0 = new 'FalseClass'
-    setattribute self, '$!from_exclusive', $P0
-    setattribute self, '$!to_exclusive', $P0
+    setattribute self, '$!exclusive', $P0
     setattribute self, '$!from', from
     setattribute self, '$!to', to
+.end
+
+.sub 'initialize' :method :multi(_,_,_,_)
+    .param pmc from
+    .param pmc to
+    .param pmc exclusive
+    if exclusive goto exclusive_true
+    $P0 = new 'FalseClass'
+    goto finish
+  exclusive_true:
+    $P0 = new 'TrueClass'
+  finish:
+    setattribute self, '$!from', from
+    setattribute self, '$!to', to
+    setattribute self, '$!exclusive', $P0
 .end
 
 =item each(block)
@@ -452,8 +459,7 @@ Construct a range from the endpoints.
     .local pmc proto, true, false
     proto = get_hll_global 'CardinalRange'
     true = get_hll_global 'true'
-    false = get_hll_global 'false'
-    $P0 = proto.'new'('$!from'=>from, '$!to'=>to, '$!from_exclusive'=>false, '$!to_exclusive'=>true)
+    $P0 = proto.'new'('$!from'=>from, '$!to'=>to, '$!exclusive'=>true)
     .return ($P0)
 .end
 
@@ -475,14 +481,9 @@ honoring exclusive flags.
 .namespace ['CardinalRange']
 .sub '!from_test' :method
     .param pmc topic
-    .local pmc from, fromexc
+    .local pmc from
     from = getattribute self, '$!from'
-    fromexc = getattribute self, '$!from_exclusive'
-    if fromexc goto exclusive_test
     $I0 = isge topic, from
-    .return ($I0)
-  exclusive_test:
-    $I0 = isgt topic, from
     .return ($I0)
 .end
 
@@ -500,7 +501,7 @@ honoring exclusive flags.
     $I0 = islt $I0, $I1
     .return ($I0)
   test_value:
-    toexc = getattribute self, '$!to_exclusive'
+    toexc = getattribute self, '$!exclusive'
     if toexc goto exclusive_test
     $I0 = isle topic, to
     .return ($I0)
