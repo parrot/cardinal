@@ -1360,7 +1360,7 @@ Retrieve the number of elements in C<self>
     end = end + len
 
   skip_end_neg:
-    $P0 = getattribute range, '$!to_exclusive'
+    $P0 = getattribute range, '$!exclusive'
     if $P0 goto skip_inc_end
     inc end
   skip_inc_end:
@@ -1535,7 +1535,7 @@ Retrieve the number of elements in C<self>
     beg = r.'from'()
     end = r.'to'()
 
-    $P0 = getattribute r, '$!to_exclusive'
+    $P0 = getattribute r, '$!exclusive'
     if $P0 goto skip_exclusive_to
     inc end
 
