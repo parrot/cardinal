@@ -21,7 +21,7 @@ src/classes/CardinalRange.pir - methods for the CardinalRange class
     #meta.'register'('CardinalRange', 'CardinalObject', 'protoobject'=>proto)
 .end
 
-=item VTABLE_get integer (vtable method)
+=item VTABLE_get_integer (vtable method)
 
 =item VTABLE_get_number (vtable method)
 
@@ -122,7 +122,7 @@ Gets the beginning or end of the range.
 
 =item to_a
 
- Generates and returns this range as an array. This will eventually be refactored w/ the other Enumerable methods This will eventually be refactored w/ the other Enumerable methods.
+Generates and returns this range as an array. This will eventually be refactored with the other Enumerable methods.
 
 =cut
 
@@ -136,22 +136,23 @@ Gets the beginning or end of the range.
    if $P0 goto build_exclusive
    $S0 = '..'
    goto build_return
-   build_exclusive:
-      $S0 = '...'
-      goto build_return
-   build_return:
-      $P0 = getattribute self, '$!from'
-      $P1 = getattribute self, '$!to'
-      $P3 = new 'CardinalString'
-      $P3.'concat'($P0)
-      $P3.'concat'($S0)
-      $P3.'concat'($P1)
-      .return ($P3)
+
+ build_exclusive:
+   $S0 = '...'
+
+ build_return:
+   $P0 = getattribute self, '$!from'
+   $P1 = getattribute self, '$!to'
+   $P3 = new 'CardinalString'
+   $P3.'concat'($P0)
+   $P3.'concat'($S0)
+   $P3.'concat'($P1)
+   .return ($P3)
 .end
 
 =item iterator()  (vtable method)
 
-Return an iterator for the CardinalRange.  Since CardinalRanges are already
+Return an iterator for the CardinalRange. Since CardinalRanges are already
 iterators, we can just return a clone.
 
 =cut
@@ -184,36 +185,43 @@ just return a clone of the CardinalRange.
 .end
 
 
-=item min()
-
-=item minmax()
-
-=item max()
-
-=cut
-
 .namespace ['CardinalRange']
 
-=item
- Return first element in CardinalRange. Will later be refactored as part of the Enumerable module.
+=item min()
+
+Return first element in CardinalRange. Will later be refactored as part of the Enumerable module.
+
 =cut
+
 .sub 'min' :method
     .tailcall self.'from'()
 .end
 
-=item
- Return first element in CardinalRange.
+=item begin()
+
+Return first element in CardinalRange.
+
 =cut
+
 .sub 'begin' :method
     .tailcall self.'from'()
 .end
 
-=item
- Return first element in CardinalRange.
+=item first()
+
+Return first element in CardinalRange.
+
 =cut
+
 .sub 'first' :method
     .tailcall self.'from'()
 .end
+
+=item minmax()
+
+Return the first and the last element in CardinalRange as a list.
+
+=cut
 
 .sub 'minmax' :method
     $P0 = self.'from'()
@@ -222,40 +230,55 @@ just return a clone of the CardinalRange.
     .tailcall $P2($P0, $P1)
 .end
 
-=item
- Return last element in CardinalRange. Will later be refactored as part of the Enumerable module.
+=item max()
+
+Return last element in CardinalRange. Will later be refactored as part of the Enumerable module.
+
 =cut
+
 .sub 'max' :method
     .tailcall self.'to'()
 .end
 
-=item
- Return last element in CardinalRange.
+=item last()
+
+Return last element in CardinalRange.
+
 =cut
+
 .sub 'last' :method
     .tailcall self.'to'()
 .end
 
-=item
- Return last element in CardinalRange.
+=item end()
+
+Return last element in CardinalRange.
+
 =cut
+
 .sub 'end' :method
     .tailcall self.'to'()
 .end
 
-=item
-Return true if the parameter is located with this CardinalRange
+=item covers?()
+
+Return true if the parameter is located within this CardinalRange
+
 =cut
+
 .sub 'covers?' :method
    .param pmc test
    $P0 = self.'include?'(test)
    .return ($P0)
 .end
 
-=item
-Return true if the parameter is located with this CardinalRange
-1.9 does a succ on the last element if it isnt a integer, so this doesnt work
+=item include?()
+
+Return true if the parameter is located within this CardinalRange
+1.9 does a succ on the last element if it isn't a integer, so this doesn't work
+
 =cut
+
 .sub 'include?' :method
   .param pmc test
   $P0 = self.'from'()
@@ -265,18 +288,15 @@ Return true if the parameter is located with this CardinalRange
   if $I0 == 0 goto out_of_bounds
   $I0 = self.'!to_test'(test)
   if $I0 == 0 goto out_of_bounds
-  #if test <= $P0 goto out_of_bounds
-  #if test >= $P1 goto out_of_bounds
-  $P3 = get_hll_global 'true'
+  $P3 = new 'TrueClass'
   .return ($P3)
-  out_of_bounds:
-      $P3 = get_hll_global 'false'
-      #say 'out of bounds'
-      #throw 'out of bounds!'
-      .return ($P3)
+
+out_of_bounds:
+  $P3 = new 'FalseClass'
+  .return ($P3)
 .end
 
-=item
+=item member?()
 
 Return C<true> if the parameter is a member of this CardinalRange
 
@@ -284,10 +304,8 @@ Return C<true> if the parameter is a member of this CardinalRange
 
 .sub 'member?' :method
    .param pmc test
-   $P0 = self.'include?'(test)
-   .return ($P0)
+   .tailcall self.'include?'(test)
 .end
-
 
 =item pop()  (vtable_method)
 
@@ -296,11 +314,11 @@ Generate the next element at the end of the CardinalRange.
 =cut
 
 .sub 'pop' :method :vtable('pop_pmc')
-    .local pmc to, toexc, value
+    .local pmc to, exc, value
     to = getattribute self, '$!to'
-    toexc = getattribute self, '$!exclusive'
+    exc = getattribute self, '$!exclusive'
     value = 'postfix:--'(to)
-    unless toexc goto have_value
+    unless exc goto have_value
     value = clone to
   have_value:
     $I0 = self.'!from_test'(value)
@@ -310,7 +328,6 @@ Generate the next element at the end of the CardinalRange.
   success:
     .return (value)
 .end
-
 
 =item shift()   (vtable_method)
 
@@ -331,7 +348,6 @@ Generate the next element at the front of the CardinalRange.
     .return (value)
 .end
 
-
 =item true()
 
 Return true if there are any more values to iterate over.
@@ -341,10 +357,8 @@ Return true if there are any more values to iterate over.
 .sub 'true' :method :vtable('get_bool')
     .local pmc from
     from = getattribute self, '$!from'
-    $I0 = self.'!to_test'(from)
-    .return ($I0)
+    .tailcall self.'!to_test'(from)
 .end
-
 
 .sub 'initialize' :method :multi(_)
     .param pmc hash :named :slurpy
