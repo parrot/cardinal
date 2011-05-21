@@ -134,10 +134,8 @@ Gets the beginning or end of the range.
 .end
 
 .sub 'to_s' :method
-   $P0 = getattribute self, '$!from_exclusive'
-   $P1 = getattribute self, '$!to_exclusive'
-   $P2 = $P0 && $P1
-   if $P2 > 0 goto build_exclusive
+   $P0 = getattribute self, '$!to_exclusive'
+   if $P0 goto build_exclusive
    $S0 = '..'
    goto build_return
    build_exclusive:
@@ -389,6 +387,21 @@ Return true if there are any more values to iterate over.
     setattribute self, '$!to_exclusive', $P0
     setattribute self, '$!from', from
     setattribute self, '$!to', to
+.end
+
+.sub 'initialize' :method :multi(_,_,_,_)
+    .param pmc from
+    .param pmc to
+    .param pmc exclusive
+    if exclusive goto exclusive_true
+    $P0 = new 'FalseClass'
+    goto finish
+  exclusive_true:
+    $P0 = new 'TrueClass'
+  finish:
+    setattribute self, '$!from', from
+    setattribute self, '$!to', to
+    setattribute self, '$!to_exclusive', $P0
 .end
 
 =item each(block)
