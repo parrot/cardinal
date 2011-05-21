@@ -1,6 +1,6 @@
 require 'Test'
 include Test
-plan 1
+plan 2
 
 r = Range.new(1,10)
 range_str = r.to_s
