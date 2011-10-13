@@ -143,3 +143,6 @@ puts "ok 29"
 
 (true)
 puts "ok 30"
+
+(-1.0)
+puts "ok 31"
