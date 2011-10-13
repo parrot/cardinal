@@ -61,7 +61,10 @@ rule alias {
 }
 
 token stmt {
-    <basic_stmt> <.ws> <stmt_mod>*
+    [
+    | '(' \s*\n* <basic_stmt> <.ws> <stmt_mod>* \s*\n* ')' # NOTE: this change is not allows '(- 1)'
+    | <basic_stmt> <.ws> <stmt_mod>*
+    ]
     {*}
 }
 
