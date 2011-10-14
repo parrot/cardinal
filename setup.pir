@@ -26,6 +26,42 @@ See <runtime/parrot/library/distutils.pir>.
     .local pmc config
     config = get_config()
 
+    # NOTE: ugly!!
+    # check minimum version of parrot
+    .local int min_major
+    .local int min_minor
+    .local int min_patch
+    .local int sys_major
+    .local int sys_minor
+    .local int sys_patch
+    min_major = 3
+    min_minor = 3
+    min_patch = 0
+    sys_major = config['MAJOR']
+    sys_minor = config['MINOR']
+    sys_patch = config['PATCH']
+
+    unless sys_major >= min_major goto abort
+    unless sys_minor >= min_minor goto abort
+    unless sys_patch >= min_patch goto abort
+    goto success
+
+  abort:
+    print <<'MSG'
+
+BUILD FAILED
+===================================================
+    
+Your Parrot is older version than Cardinal requires
+Please upgrade to Parrot-3.3.0
+
+See parrot download page for more details:
+  http://parrot.org/download
+
+MSG
+    exit 1
+
+  success:
     .const 'Sub' postbuild = 'postbuild'
     register_step_after('build', postbuild)
 
