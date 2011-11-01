@@ -174,8 +174,7 @@ function __test() {
   ${ get_global test_opt, 'test_target' };
 
   string command = './installable_cardinal ';
-  var files = {
-  };
+  var files = {};
   files['general'] = glob('t/*.t');
   files['array']   = glob('t/array/*.t');
   files['file']    = glob('t/file/*.t');
@@ -191,15 +190,9 @@ function __test() {
     target = { 'opt' : files[test_opt] };
   } else {
     target = files;
-    //var t = glob('t/');
-    //for (string f in t) {
-    //  say(f);
-    //}
-    //${ exit 0 };
   }
 
-  // TODO: dirty!
-  // run tests
+  // TODO: make sure runtests works
   for (string key in target) {
     for (string file in target[key]) {
       //${ runtests file :flat, command :named('exec') };
@@ -230,10 +223,6 @@ function __smoke() {
   cardinal['smolder_tags']   = config['osname'] + ', ' + config['archname'];
   cardinal['prove_archive']  = 'report.tar.gz';
   cardinal['smolder_url']    = 'http://smolder.parrot.org/app/projects/process_add_report/10';
-}
-
-function __install() {
-
 }
 
 function __help() {
