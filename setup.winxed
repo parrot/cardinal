@@ -31,7 +31,7 @@ function main[main](argv) {
     "doc_files"         : 'README.rdoc',
     "manifest_includes" : ["README.rdoc", "setup.winxed"]
   };
-  var required = { "parrot" : "3.8.0", "winxed" : '1.2.0' };
+  var requirement = { "parrot" : "3.8.0", "winxed" : '1.2.0' };
   var config = getinterp()[IGLOBALS_CONFIG_HASH];
 
   // test option: ex) test array
@@ -42,11 +42,10 @@ function main[main](argv) {
 
   ${ set_global 'cardinal', cardinal };
   ${ set_global 'config', config };
-  ${ set_global 'required', required };
+  ${ set_global 'requirement', requirement };
 
   // register steps
   register_step("__build", __build);
-  register_step("smoke", __smoke);
   register_step("__test", __test);
 
   register_step_before("__build", __check_dependencies);
@@ -55,8 +54,8 @@ function main[main](argv) {
   register_step_before("clean", __clean);
   register_step_before("__test", __check_dependencies);
   register_step_before("test", __test);
-  register_step_before("smoke", __check_dependencies);
-  register_step_before("install", __install);
+  register_step_before("smoke", __smoke);
+  register_step_before("install", __build);
   register_step_after("help", __help);
 
   argv.shift();
@@ -66,23 +65,19 @@ function main[main](argv) {
 // before steps
 function __check_dependencies() {
   var config;
-  var required;
+  var requirement;
   ${ get_global config, 'config'};
-  ${ get_global required, 'required'};
+  ${ get_global requirement, 'requirement'};
 
-  var req = split('.', required['parrot']);
+  var req = split('.', requirement['parrot']);
   var sys = split('.', config['VERSION']);
 
   if( (req[0] > sys[0]) || (req[1] > sys[1]) || (req[2] > sys[2]) ) {
-    // bug?
-    // string msg = '' + required['parrot'];
-    // msg is expected 3.3.0 but was 3
-
     say("BUILD FAILED");
     say("===================================================");
     say("Your Parrot is older version than Cardinal requires");
     print("Please upgrade to Parrot-");
-    say(required['parrot']);
+    say(requirement['parrot']);
     say("");
     say("See parrot download page for more details:");
     say("  http://parrot.org/download");
@@ -179,7 +174,8 @@ function __test() {
   ${ get_global test_opt, 'test_target' };
 
   string command = './installable_cardinal ';
-  var files = {};
+  var files = {
+  };
   files['general'] = glob('t/*.t');
   files['array']   = glob('t/array/*.t');
   files['file']    = glob('t/file/*.t');
@@ -195,17 +191,22 @@ function __test() {
     target = { 'opt' : files[test_opt] };
   } else {
     target = files;
+    //var t = glob('t/');
+    //for (string f in t) {
+    //  say(f);
+    //}
+    //${ exit 0 };
   }
 
   // TODO: dirty!
   // run tests
   for (string key in target) {
-      for (string file in target[key]) {
-        //${ runtests file :flat, command :named('exec') };
-        int result = 0;
-        string exe = command + file;
-        say(exe);
-        ${ spawnw result, exe };
+    for (string file in target[key]) {
+      //${ runtests file :flat, command :named('exec') };
+      int result = 0;
+      string exe = command + file;
+      say(exe);
+      ${ spawnw result, exe };
     }
   }
 
@@ -214,19 +215,21 @@ function __test() {
 
 function __smoke() {
   var config;
+  var cardinal;
   var smoke_extra = {};
 
   ${ get_global config, 'config'};
+  ${ get_global cardinal, 'cardinal'};
 
   smoke_extra['Architecture']    = config['archname'];
   smoke_extra['Platform']        = config['osname'];
   smoke_extra['Parrot Revision'] = config['revision'];
-  //smoke_extra['Submitter'] = get_submitter();
+  //smoke_extra['Submitter']       = '';
 
-  config['smolder_extra_properties'] = smoke_extra;
-  //config['smolder_tags'] = ${get_tags()};
-  config['prove_archive']  = 'report.tar.gz';
-  config['smolder_url']    = 'http://smolder.parrot.org/app/projects/process_add_report/10';
+  cardinal['smolder_extra_properties'] = smoke_extra;
+  cardinal['smolder_tags']   = config['osname'] + ', ' + config['archname'];
+  cardinal['prove_archive']  = 'report.tar.gz';
+  cardinal['smolder_url']    = 'http://smolder.parrot.org/app/projects/process_add_report/10';
 }
 
 function __install() {
@@ -234,16 +237,16 @@ function __install() {
 }
 
 function __help() {
-  var required;
-  ${ get_global required, 'required'};
+  var requirement;
+  ${ get_global requirement, 'requirement'};
 
-  string parrot = required['parrot'];
-  string winxed = required['winxed'];
+  string parrot = requirement['parrot'];
+  string winxed = requirement['winxed'];
 
   say(
     "\t"   + "smoke:\t\tReport smoke test." + "\n\n" +
-    "    " + "Requirements:"  + "\n\n" +
-    "\t"   + "parrot: "       + "\t"   + parrot + "\n\n" +
-    "\t"   + "winxed: "       + "\t"   + winxed
+    "    " + "Requirements:"                + "\n\n" +
+    "\t"   + "parrot: "                     + "\t"   + parrot + "\n\n" +
+    "\t"   + "winxed: "                     + "\t"   + winxed
   );
 }
