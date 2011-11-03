@@ -1,25 +1,27 @@
 #!/usr/bin/env winxed
 
-// =head1 NAME
-// 
-// setup.winxed - Python distutils style
-// 
-// =head1 DESCRIPTION
-// 
-// No Configure step, no Makefile generated.
-// 
-// See <runtime/parrot/library/distutils.pir>.
-// 
-// =head1 USAGE
-// 
-//     $ winxed setup.winxed build
-//     $ winxed setup.winxed test [name]
-//     $ sudo winxed setup.winxed install
-//
-//     for more usages:
-//     $ winxed setup.winxed help
-// 
-// =cut
+/*
+=head1 NAME
+
+setup.winxed - Python distutils style
+
+=head1 DESCRIPTION
+
+No Configure step, no Makefile generated.
+
+See <runtime/parrot/library/distutils.pir>.
+
+=head1 USAGE
+
+    $ winxed setup.winxed build
+    $ winxed setup.winxed test [name]
+    $ sudo winxed setup.winxed install
+
+    for more usages:
+    $ winxed setup.winxed help
+
+=cut
+*/
 
 $include_const "iglobals.pasm";
 using extern "io_ops";
