@@ -1,14 +1,43 @@
+#!/usr/bin/env winxed
+
+// =head1 NAME
+// 
+// setup.winxed - Python distutils style
+// 
+// =head1 DESCRIPTION
+// 
+// No Configure step, no Makefile generated.
+// 
+// See <runtime/parrot/library/distutils.pir>.
+// 
+// =head1 USAGE
+// 
+//     $ winxed setup.winxed build
+//     $ winxed setup.winxed test [name]
+//     $ sudo winxed setup.winxed install
+//
+//     for more usages:
+//     $ winxed setup.winxed help
+// 
+// =cut
+
 $include_const "iglobals.pasm";
 using extern "io_ops";
 
 function main[main](argv) {
-  // load parrot library & targes
   load_bytecode('distutils.pir');
 
   using setup;
+  using register_step;
   using register_step_before;
+  using register_step_after;
 
   // config
+  var config = getinterp()[IGLOBALS_CONFIG_HASH];
+  var requirement = {
+    "parrot" : "3.8.0",
+    "winxed" : '1.2.0+'
+  };
   var cardinal = {
     "name"              : 'Cardinal',
     "abstract"          : 'Cardinal - Ruby compiler for Parrot',
@@ -26,44 +55,53 @@ function main[main](argv) {
     "pir_nqp"           : {},
     "pir_pir"           : {},
     "pbc_pir"           : {},
-    "installable_pbc"   : {},
-    "prove_exec"        : {},
+    "prove_exec"        : string(get_parrot()) + ' cardinal.pbc',
+    "prove_files"       : 't/*.t t/*/*.t',
+    "prove_archive"     : 'report.tar.gz',
+    "smolder_url"       : 'http://smolder.parrot.org/app/projects/process_add_report/10',
+    "installable_pbc"   : { 'parrot-cardinal' : 'cardinal.pbc' },
     "doc_files"         : 'README.rdoc',
     "manifest_includes" : ["README.rdoc", "setup.winxed"]
   };
-  var requirement = { "parrot" : "3.8.0", "winxed" : '1.2.0' };
-  var config = getinterp()[IGLOBALS_CONFIG_HASH];
-
-  // test option: ex) test array
-  if ( (argv[1] == 'test') && argv[2] != '' ) {
-    var test_target = argv[2];
-    ${ set_global 'test_target', test_target };
-  }
 
   ${ set_global 'cardinal', cardinal };
   ${ set_global 'config', config };
   ${ set_global 'requirement', requirement };
 
-  // register steps
-  register_step("__build", __build);
-  register_step("__test", __test);
+  // check dependencies
+  check_cardinal_deps();
 
-  register_step_before("__build", __check_dependencies);
+  // test option:
+  // ex) setup.winxed test array
+  if ( (argv[1] == 'test') && argv[2] != '' ) {
+    var test_target = argv[2];
+    ${ set_global 'test_target', test_target };
+  }
+
+  // register steps
   register_step_before("build", __build);
   register_step_after("build", __build_test_pir);
   register_step_before("clean", __clean);
-  register_step_before("__test", __check_dependencies);
-  register_step_before("test", __test);
+  register_step_before("test", __optional_test);
   register_step_before("smoke", __smoke);
-  register_step_before("install", __build);
   register_step_after("help", __help);
+  register_step_before("install", __check_install);
+
+  // run build before 'sdist', 'bdist'
+  if ( (argv[1] == 'sdist') || (argv[1] == 'bdist') ) {
+    run_step('build', cardinal:[flat, named]);
+  }
 
   argv.shift();
-  setup(argv, cardinal);
+  setup(argv:[flat], cardinal:[flat, named]);
 }
 
-// before steps
-function __check_dependencies() {
+
+// ///////////////////////////////// //
+// MISC
+// ///////////////////////////////// //
+
+function check_cardinal_deps() {
   var config;
   var requirement;
   ${ get_global config, 'config'};
@@ -73,19 +111,31 @@ function __check_dependencies() {
   var sys = split('.', config['VERSION']);
 
   if( (req[0] > sys[0]) || (req[1] > sys[1]) || (req[2] > sys[2]) ) {
-    say("BUILD FAILED");
-    say("===================================================");
-    say("Your Parrot is older version than Cardinal requires");
-    print("Please upgrade to Parrot-");
-    say(requirement['parrot']);
-    say("");
-    say("See parrot download page for more details:");
-    say("  http://parrot.org/download");
-
+    say(
+      "BUILD FAILED"                                               + "\n" +
+      "==================================================="        + "\n" +
+      "Your Parrot is older version than Cardinal requires"        + "\n" +
+      "Please upgrade to Parrot-" + string(requirement['parrot'])  + "\n" +
+                                                                     "\n" +
+      "See parrot download page for more details:"                 + "\n" +
+      "  http://parrot.org/download"                               + "\n"
+    );
     die('');
   }
 }
 
+function get_submitter() {
+  var env = new "Env";
+  string submitter = env['SMOLDER_SUBMITTER'];
+
+  return submitter;
+}
+
+// ///////////////////////////////// //
+// BEFORE STEPS HERE
+// ///////////////////////////////// //
+
+// add a {NewClass}.pir here
 function __build() {
   var cardinal;
   ${ get_global cardinal, 'cardinal'};
@@ -131,17 +181,53 @@ function __build() {
     "src/gen_actions.pir",
     "src/gen_builtins.pir"
   ];
-
-  cardinal['installable_pbc']['parrot-cardinal'] = 'cardinal.pbc';
 }
 
 function __build_test_pir() {
-  var cmd = './installable_cardinal --target=pir --output=Test.pir Test.rb';
-  say(cmd);
-  system(cmd);
+  int exit_code = 0;
+  ${ stat exit_code, './Test.pir', 0 };
+
+  // pass Test.pir when cardinal is already builded
+  if ( ! exit_code ) {
+    // build Test.rb
+    var cardinal;
+    ${ get_global cardinal, 'cardinal' };
+
+    string parrot_cmd      = string(get_parrot());
+    string installable_pbc = string(cardinal['installable_pbc']['parrot-cardinal']);
+
+    var cmd = parrot_cmd + ' ' + installable_pbc + ' ' + '--target=pir --output=Test.pir Test.rb';
+
+    say(cmd);
+    system(cmd);
+  }
+}
+
+function __check_install() {
+  var cardinal;
+  string installable_pbc;
+  int exit_code = 0;
+
+  ${ get_global cardinal, 'cardinal' };
+  installable_pbc = string(cardinal['installable_pbc']['parrot-cardinal']);
+  ${ stat exit_code, installable_pbc, 0 };
+
+  if ( ! exit_code ) {
+    say( 
+      "INSTALL FAILED"                              + "\n" +
+      "===========================================" + "\n" +
+      "Make sure build cardinal before run install" + "\n" +
+                                                      "\n" +
+      "$ winxed setup.winxed build"                 + "\n" +
+      "$ sudo winxed setup.winxed install"
+    );
+    ${ exit exit_code };
+  }
 }
 
 function __clean() {
+  load_bytecode('osutils.pbc');
+
   var files = [
     './cardinal.c',
     './cardinal.o',
@@ -153,76 +239,84 @@ function __clean() {
     './src/gen_actions.pir',
     './src/gen_builtins.pir',
     './cardinal.pbc',
-    './installable_cardinal'
+    './installable_cardinal',
+    './parrot-cardinal-HEAD.tar.gz',
+    './rpm/SOURCES/parrot-cardinal-HEAD.tar.gz',
+    './rpm/SPEC/parrot-cardinal.spec'
+  ];
+  var dirs = [
+    './rpm/SOURCES',
+    './rpm/SPECS',
+    './rpm'
   ];
 
   for (string file in files) {
-    int e = 0;
-    ${ stat e, file, 0 };
-    if(e) {
+    int exit_code = 0;
+    ${ stat exit_code, file, 0 };
+
+    if ( exit_code ) {
       say("unlink " + file);
       unlink(file);
     }
   }
-}
 
-// TODO: print test report!
-function __test() {
-  int result;
-  var target;
-  var test_opt;
-  ${ get_global test_opt, 'test_target' };
+  for (string dir in dirs) {
+    int exit_code = 0;
+    ${ stat exit_code, dir, 0 };
 
-  string command = './installable_cardinal ';
-  var files = {};
-  files['general'] = glob('t/*.t');
-  files['array']   = glob('t/array/*.t');
-  files['file']    = glob('t/file/*.t');
-  files['float']   = glob('t/float/*.t');
-  files['hash']    = glob('t/array/*.t');
-  files['integer'] = glob('t/integer/*.t');
-  files['kernel']  = glob('t/kernel/*.t');
-  files['math']    = glob('t/math/*.t');
-  files['range']   = glob('t/range/*.t');
-  files['string']  = glob('t/string/*.t');
+    if ( exit_code ) {
+      var os;
+      ${ new os, 'OS' };
 
-  if ( test_opt != null ) {
-    target = { 'opt' : files[test_opt] };
-  } else {
-    target = files;
-  }
-
-  // TODO: make sure runtests works
-  for (string key in target) {
-    for (string file in target[key]) {
-      //${ runtests file :flat, command :named('exec') };
-      int result = 0;
-      string exe = command + file;
-      say(exe);
-      ${ spawnw result, exe };
+      say("remove " + dir);
+      os.rm(dir);
     }
   }
+}
 
-  ${ exit result };
+// NO NEED TO ADD NEW TEST DIR
+function __optional_test() {
+  var test_target;
+  ${ get_global test_target, 'test_target' };
+
+  if ( test_target != null ) {
+    var cardinal;
+    var files;
+    string command;
+
+    ${ get_global cardinal, 'cardinal' };
+    run_step('build', cardinal:[flat, named]);
+
+    if ( string(test_target) == 'builtins' ) {
+      files = glob('t/*.t');
+    } else {
+      files = glob('t/' + string(test_target) + '/*.t' );
+    }
+
+    command = string(get_parrot()) + ' cardinal.pbc';
+
+    say('Test ' + string(test_target) + "\n");
+    runtests(files:[flat], command:[named('exec')]);
+
+    ${ exit 0 };
+  }
 }
 
 function __smoke() {
   var config;
   var cardinal;
-  var smoke_extra = {};
+  var extra_prop = {};
 
-  ${ get_global config, 'config'};
-  ${ get_global cardinal, 'cardinal'};
+  ${ get_global config, 'config' };
+  ${ get_global cardinal, 'cardinal' };
 
-  smoke_extra['Architecture']    = config['archname'];
-  smoke_extra['Platform']        = config['osname'];
-  smoke_extra['Parrot Revision'] = config['revision'];
-  //smoke_extra['Submitter']       = '';
+  extra_prop['Architecture']    = string(config['archname']);
+  extra_prop['Platform']        = string(config['osname']);
+  extra_prop['Parrot Revision'] = string(config['revision']);
+  extra_prop['Submitter']       = get_submitter();
 
-  cardinal['smolder_extra_properties'] = smoke_extra;
-  cardinal['smolder_tags']   = config['osname'] + ', ' + config['archname'];
-  cardinal['prove_archive']  = 'report.tar.gz';
-  cardinal['smolder_url']    = 'http://smolder.parrot.org/app/projects/process_add_report/10';
+  cardinal['smolder_extra_properties'] = extra_prop;
+  cardinal['smolder_tags'] = string(config['osname']) + ', ' + string(config['archname']);
 }
 
 function __help() {
@@ -233,9 +327,9 @@ function __help() {
   string winxed = requirement['winxed'];
 
   say(
-    "\t"   + "smoke:\t\tReport smoke test." + "\n\n" +
-    "    " + "Requirements:"                + "\n\n" +
-    "\t"   + "parrot: "                     + "\t"   + parrot + "\n\n" +
-    "\t"   + "winxed: "                     + "\t"   + winxed
+    "        "   + "smoke:          Report smoke test." + "\n\n"       +
+    "    "       + "Requirements:"                      + "\n\n"       +
+    "        "   + "parrot: "                           + "        "   + string(parrot) + "\n\n" +
+    "        "   + "winxed: "                           + "        "   + string(winxed)
   );
 }
