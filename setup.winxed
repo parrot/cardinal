@@ -1,0 +1,337 @@
+#!/usr/bin/env winxed
+
+/*
+=head1 NAME
+
+setup.winxed - Python distutils style
+
+=head1 DESCRIPTION
+
+No Configure step, no Makefile generated.
+
+See <runtime/parrot/library/distutils.pir>.
+
+=head1 USAGE
+
+    $ winxed setup.winxed build
+    $ winxed setup.winxed test [name]
+    $ sudo winxed setup.winxed install
+
+    for more usages:
+    $ winxed setup.winxed help
+
+=cut
+*/
+
+$include_const "iglobals.pasm";
+using extern "io_ops";
+
+function main[main](argv) {
+  load_bytecode('distutils.pir');
+
+  using setup;
+  using register_step;
+  using register_step_before;
+  using register_step_after;
+
+  // config
+  var config = getinterp()[IGLOBALS_CONFIG_HASH];
+  var requirement = {
+    "parrot" : "3.8.0",
+    "winxed" : '1.2.0+'
+  };
+  var cardinal = {
+    "name"              : 'Cardinal',
+    "abstract"          : 'Cardinal - Ruby compiler for Parrot',
+    "authority"         : 'http://github.com/parrot',
+    "description"       : 'Cardinal is a Ruby compiler for Parrot.',
+    "keywords"          : [ "parrot", "cardinal", "ruby" ],
+    "license_type"      : 'Artistic License 2.0',
+    "license_uri"       : 'http://www.perlfoundation.org/artistic_license_2_0',
+    "copyright_holder"  : 'Parrot Foundation',
+    "checkout_uri"      : 'git://github.com/parrot/cardinal.git',
+    "browser_uri"       : 'git://github.com/parrot/cardinal.git',
+    "project_uri"       : 'git://github.com/parrot/cardinal.git',
+    "inc_pir"           : {},
+    "pir_pge"           : {},
+    "pir_nqp"           : {},
+    "pir_pir"           : {},
+    "pbc_pir"           : {},
+    "prove_exec"        : string(get_parrot()) + ' cardinal.pbc',
+    "prove_files"       : 't/*.t t/*/*.t',
+    "prove_archive"     : 'report.tar.gz',
+    "smolder_url"       : 'http://smolder.parrot.org/app/projects/process_add_report/10',
+    "installable_pbc"   : { 'parrot-cardinal' : 'cardinal.pbc' },
+    "doc_files"         : 'README.rdoc',
+    "manifest_includes" : ["README.rdoc", "setup.winxed"]
+  };
+
+  ${ set_global 'cardinal', cardinal };
+  ${ set_global 'config', config };
+  ${ set_global 'requirement', requirement };
+
+  // check dependencies
+  check_cardinal_deps();
+
+  // test option:
+  // ex) setup.winxed test array
+  if ( (argv[1] == 'test') && argv[2] != '' ) {
+    var test_target = argv[2];
+    ${ set_global 'test_target', test_target };
+  }
+
+  // register steps
+  register_step_before("build", __build);
+  register_step_after("build", __build_test_pir);
+  register_step_before("clean", __clean);
+  register_step_before("test", __optional_test);
+  register_step_before("smoke", __smoke);
+  register_step_after("help", __help);
+  register_step_before("install", __check_install);
+
+  // run build before 'sdist', 'bdist'
+  if ( (argv[1] == 'sdist') || (argv[1] == 'bdist') ) {
+    run_step('build', cardinal:[flat, named]);
+  }
+
+  argv.shift();
+  setup(argv:[flat], cardinal:[flat, named]);
+}
+
+
+// ///////////////////////////////// //
+// MISC
+// ///////////////////////////////// //
+
+function check_cardinal_deps() {
+  var config;
+  var requirement;
+  ${ get_global config, 'config'};
+  ${ get_global requirement, 'requirement'};
+
+  var req = split('.', requirement['parrot']);
+  var sys = split('.', config['VERSION']);
+
+  if( (req[0] > sys[0]) || (req[1] > sys[1]) || (req[2] > sys[2]) ) {
+    say(
+      "BUILD FAILED"                                               + "\n" +
+      "==================================================="        + "\n" +
+      "Your Parrot is older version than Cardinal requires"        + "\n" +
+      "Please upgrade to Parrot-" + string(requirement['parrot'])  + "\n" +
+                                                                     "\n" +
+      "See parrot download page for more details:"                 + "\n" +
+      "  http://parrot.org/download"                               + "\n"
+    );
+    die('');
+  }
+}
+
+function get_submitter() {
+  var env = new "Env";
+  string submitter = env['SMOLDER_SUBMITTER'];
+
+  return submitter;
+}
+
+// ///////////////////////////////// //
+// BEFORE STEPS HERE
+// ///////////////////////////////// //
+
+// add a {NewClass}.pir here
+function __build() {
+  var cardinal;
+  ${ get_global cardinal, 'cardinal'};
+
+  cardinal['inc_pir']['src/gen_builtins.pir'] = [
+    "src/builtins/guts.pir",
+    "src/builtins/control.pir",
+    "src/builtins/say.pir",
+    "src/builtins/cmp.pir",
+    "src/builtins/op.pir",
+    "src/classes/Object.pir",
+    "src/classes/Exception.pir",
+    "src/classes/NilClass.pir",
+    "src/classes/String.pir",
+    "src/classes/Numeric.pir",
+    "src/classes/Integer.pir",
+    "src/classes/Float.pir",
+    "src/classes/Array.pir",
+    "src/classes/Hash.pir",
+    "src/classes/Range.pir",
+    "src/classes/TrueClass.pir",
+    "src/classes/FalseClass.pir",
+    "src/classes/Kernel.pir",
+    "src/classes/Time.pir",
+    "src/classes/Math.pir",
+    "src/classes/GC.pir",
+    "src/classes/IO.pir",
+    "src/classes/Proc.pir",
+    "src/classes/File.pir",
+    "src/classes/FileStat.pir",
+    "src/classes/Dir.pir",
+    "src/builtins/globals.pir",
+    "src/builtins/eval.pir",
+    "src/classes/Continuation.pir"
+  ];
+  cardinal['pir_pge']['src/gen_grammar.pir'] = 'src/parser/grammar.pg';
+  cardinal['pir_nqp']['src/gen_actions.pir'] = 'src/parser/actions.pm';
+
+  cardinal['pbc_pir']['cardinal.pbc'] = [
+    "cardinal.pir",
+    "src/parser/quote_expression.pir",
+    "src/gen_grammar.pir",
+    "src/gen_actions.pir",
+    "src/gen_builtins.pir"
+  ];
+}
+
+function __build_test_pir() {
+  int exit_code = 0;
+  ${ stat exit_code, './Test.pir', 0 };
+
+  // pass Test.pir when cardinal is already builded
+  if ( ! exit_code ) {
+    // build Test.rb
+    var cardinal;
+    ${ get_global cardinal, 'cardinal' };
+
+    string parrot_cmd      = string(get_parrot());
+    string installable_pbc = string(cardinal['installable_pbc']['parrot-cardinal']);
+
+    var cmd = parrot_cmd + ' ' + installable_pbc + ' ' + '--target=pir --output=Test.pir Test.rb';
+
+    say(cmd);
+    system(cmd);
+  }
+}
+
+function __check_install() {
+  var cardinal;
+  string installable_pbc;
+  int exit_code = 0;
+
+  ${ get_global cardinal, 'cardinal' };
+  installable_pbc = string(cardinal['installable_pbc']['parrot-cardinal']);
+  ${ stat exit_code, installable_pbc, 0 };
+
+  if ( ! exit_code ) {
+    say( 
+      "INSTALL FAILED"                              + "\n" +
+      "===========================================" + "\n" +
+      "Make sure build cardinal before run install" + "\n" +
+                                                      "\n" +
+      "$ winxed setup.winxed build"                 + "\n" +
+      "$ sudo winxed setup.winxed install"
+    );
+    ${ exit exit_code };
+  }
+}
+
+function __clean() {
+  load_bytecode('osutils.pbc');
+
+  var files = [
+    './cardinal.c',
+    './cardinal.o',
+    './cardinal.pbc',
+    './Test.pir',
+    './report.tar.gz',
+    './build.yaml',
+    './src/gen_grammar.pir',
+    './src/gen_actions.pir',
+    './src/gen_builtins.pir',
+    './cardinal.pbc',
+    './installable_cardinal',
+    './parrot-cardinal-HEAD.tar.gz',
+    './rpm/SOURCES/parrot-cardinal-HEAD.tar.gz',
+    './rpm/SPEC/parrot-cardinal.spec'
+  ];
+  var dirs = [
+    './rpm/SOURCES',
+    './rpm/SPECS',
+    './rpm'
+  ];
+
+  for (string file in files) {
+    int exit_code = 0;
+    ${ stat exit_code, file, 0 };
+
+    if ( exit_code ) {
+      say("unlink " + file);
+      unlink(file);
+    }
+  }
+
+  for (string dir in dirs) {
+    int exit_code = 0;
+    ${ stat exit_code, dir, 0 };
+
+    if ( exit_code ) {
+      var os;
+      ${ new os, 'OS' };
+
+      say("remove " + dir);
+      os.rm(dir);
+    }
+  }
+}
+
+// NO NEED TO ADD NEW TEST DIR
+function __optional_test() {
+  var test_target;
+  ${ get_global test_target, 'test_target' };
+
+  if ( test_target != null ) {
+    var cardinal;
+    var files;
+    string command;
+
+    ${ get_global cardinal, 'cardinal' };
+    run_step('build', cardinal:[flat, named]);
+
+    if ( string(test_target) == 'builtins' ) {
+      files = glob('t/*.t');
+    } else {
+      files = glob('t/' + string(test_target) + '/*.t' );
+    }
+
+    command = string(get_parrot()) + ' cardinal.pbc';
+
+    say('Test ' + string(test_target) + "\n");
+    runtests(files:[flat], command:[named('exec')]);
+
+    ${ exit 0 };
+  }
+}
+
+function __smoke() {
+  var config;
+  var cardinal;
+  var extra_prop = {};
+
+  ${ get_global config, 'config' };
+  ${ get_global cardinal, 'cardinal' };
+
+  extra_prop['Architecture']    = string(config['archname']);
+  extra_prop['Platform']        = string(config['osname']);
+  extra_prop['Parrot Revision'] = string(config['revision']);
+  extra_prop['Submitter']       = get_submitter();
+
+  cardinal['smolder_extra_properties'] = extra_prop;
+  cardinal['smolder_tags'] = string(config['osname']) + ', ' + string(config['archname']);
+}
+
+function __help() {
+  var requirement;
+  ${ get_global requirement, 'requirement'};
+
+  string parrot = requirement['parrot'];
+  string winxed = requirement['winxed'];
+
+  say(
+    "        "   + "smoke:          Report smoke test." + "\n\n"       +
+    "    "       + "Requirements:"                      + "\n\n"       +
+    "        "   + "parrot: "                           + "        "   + string(parrot) + "\n\n" +
+    "        "   + "winxed: "                           + "        "   + string(winxed)
+  );
+}
