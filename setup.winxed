@@ -24,7 +24,7 @@ See <runtime/parrot/library/distutils.pir>.
 */
 
 $include_const "iglobals.pasm";
-using extern "io_ops";
+$loadlib "io_ops";
 
 function main[main](argv) {
   load_bytecode('distutils.pir');
@@ -112,7 +112,7 @@ function check_cardinal_deps() {
   var req = split('.', requirement['parrot']);
   var sys = split('.', config['VERSION']);
 
-  if( (req[0] > sys[0]) || (req[1] > sys[1]) || (req[2] > sys[2]) ) {
+  if( !(sys[0] >= req[0] || sys[1] >= req[1] || sys[2] >= req[2]) ) {
     say(
       "BUILD FAILED"                                               + "\n" +
       "==================================================="        + "\n" +
