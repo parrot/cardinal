@@ -1,0 +1,21 @@
+before_script:
+    - sudo apt-get install libffi-dev libicu-dev libgmp3-dev liblocal-lib-perl zlib1g-dev git
+    - pushd /tmp && git clone --depth 10 git://github.com/parrot/parrot.git && cd parrot && perl Configure.pl --prefix=/tmp/parrot_install && make install && popd
+    - export PATH=$PATH:/tmp/parrot_install/bin
+    - parrot --version
+    - winxed --version
+
+script: "winxed setup.winxed build && winxed setup.winxed test"
+# branches:
+#   only:
+#     - master
+notifications:
+  recipients:
+    - parrot-dev@lists.parrot.org
+  email:
+    on_success: change
+    on_failure: always
+#  irc:
+      - "irc.parrot.org#parrot"
+#      - "irc.freenode.net#perl6"
+#env:
