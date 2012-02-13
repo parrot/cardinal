@@ -4,13 +4,15 @@ Cardinal is a Ruby compiler for Parrot Virtual Machine.
 
 The parser is fairly complete.  The standard library exists, but still needs filling out.
 
-Cardinal's parser is very *very* slow. You can precompile to PIR with --target=pir and run the result with Parrot directly to skip the parsing phase. (You may need cardinal.pbc in the same directory for this to work.)
+Cardinal's parser is very *very* slow. You can precompile to PIR with
+--target=pir and run the result with Parrot directly to skip the parsing phase.
+(You may need cardinal.pbc in the same directory for this to work.)
 
 == Getting Started with Cardinal
 
 === Downloding Cardinal
 
-Get a copy of Cardinal(read only):
+Get a copy of Cardinal (read only):
 
     git clone git://github.com/parrot/cardinal.git
 
@@ -31,19 +33,19 @@ You might get all rake tasks with:
 
 === Build with Parrot
 
-You can also build cardinal with Parrot:
+You can also build cardinal with Winxed (which comes with Parrot)
 
-    parrot setup.pir
+    winxed setup.winxed build
 
 Testing:
 
-    parrot setup.pir test
+    winxed setup.winxed test
 
 Note that some of them will probably fail, as Cardinal is not yet complete
 
 If you want to install Cardinal to your Parrot install directory, run:
 
-    parrot setup.pir install
+    winxed setup.winxed install
 
 The compiler will be available as parrot-cardinal
 
@@ -54,9 +56,5 @@ Follow the documentations to start developing cardinal.
 {Latest Parrot Documentation}[http://docs.parrot.org/parrot/latest/html/index.html]
 
 {Parrot Babysteps}[http://coolnamehere.com/geekery/parrot/learn/]
-
-Cardinal is back in active development, under the stewardship of Ted Reed <ted.reed@gmail.com>.
-
-We also have an IRC channel: #cardinal on irc.parrot.org
 
 You are also invited to #parrot on irc.parrot.org
