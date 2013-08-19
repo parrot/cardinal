@@ -55,6 +55,4 @@ Follow the documentations to start developing cardinal.
 
 {Latest Parrot Documentation}[http://docs.parrot.org/parrot/latest/html/index.html]
 
-{Parrot Babysteps}[http://coolnamehere.com/geekery/parrot/learn/]
-
 You are also invited to #parrot on irc.parrot.org
